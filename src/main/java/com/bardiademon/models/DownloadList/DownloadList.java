@@ -13,22 +13,16 @@ public final class DownloadList
     private boolean completed, createdDir;
     private long size;
 
+    public DownloadList ()
+    {
+    }
+
     public long getId ()
     {
         return id;
     }
 
-    public LocalDateTime getEndAt ()
-    {
-        return endAt;
-    }
-
-    public void setEndAt (final LocalDateTime endAt)
-    {
-        this.endAt = endAt;
-    }
-
-    public void setId (final long id)
+    public void setId (long id)
     {
         this.id = id;
     }
@@ -38,7 +32,7 @@ public final class DownloadList
         return link;
     }
 
-    public void setLink (final String link)
+    public void setLink (String link)
     {
         this.link = link;
     }
@@ -48,7 +42,7 @@ public final class DownloadList
         return path;
     }
 
-    public void setPath (final String path)
+    public void setPath (String path)
     {
         this.path = path;
     }
@@ -58,9 +52,19 @@ public final class DownloadList
         return startedAt;
     }
 
-    public void setStartedAt (final LocalDateTime startedAt)
+    public void setStartedAt (LocalDateTime startedAt)
     {
         this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getEndAt ()
+    {
+        return endAt;
+    }
+
+    public void setEndAt (LocalDateTime endAt)
+    {
+        this.endAt = endAt;
     }
 
     public LocalDateTime getTime ()
@@ -68,7 +72,7 @@ public final class DownloadList
         return time;
     }
 
-    public void setTime (final LocalDateTime time)
+    public void setTime (LocalDateTime time)
     {
         this.time = time;
     }
@@ -78,7 +82,7 @@ public final class DownloadList
         return completed;
     }
 
-    public void setCompleted (final boolean completed)
+    public void setCompleted (boolean completed)
     {
         this.completed = completed;
     }
@@ -88,7 +92,7 @@ public final class DownloadList
         return createdDir;
     }
 
-    public void setCreatedDir (final boolean createdDir)
+    public void setCreatedDir (boolean createdDir)
     {
         this.createdDir = createdDir;
     }
@@ -98,7 +102,7 @@ public final class DownloadList
         return size;
     }
 
-    public void setSize (final long size)
+    public void setSize (long size)
     {
         this.size = size;
     }

@@ -59,7 +59,7 @@ public final class DownloadListRepository
                 try (final Statement statement = Main.Database ().getConnection ().createStatement (ResultSet.TYPE_FORWARD_ONLY , ResultSet.CONCUR_READ_ONLY); final ResultSet resultSet = statement.executeQuery (makeQueryFindAll ()))
                 {
                     final List <DownloadList> downloadLists = new ArrayList <> ();
-                    do
+                    while (resultSet.next ())
                     {
                         final DownloadList downloadList = new DownloadList ();
 
@@ -84,7 +84,6 @@ public final class DownloadListRepository
 
                         downloadLists.add (downloadList);
                     }
-                    while (resultSet.next ());
 
                     Log.N ("Get List<DownloadList> => size: " + downloadLists.size () + " toString(" + downloadLists + ")");
 
