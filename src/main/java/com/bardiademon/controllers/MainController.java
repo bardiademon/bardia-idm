@@ -1,7 +1,7 @@
 package com.bardiademon.controllers;
 
 import com.bardiademon.models.DownloadList.DownloadList;
-import com.bardiademon.models.DownloadList.DownloadListRepository;
+import com.bardiademon.models.DownloadList.DownloadListService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -79,8 +79,8 @@ public final class MainController implements Initializable
 
         new Thread (() ->
         {
-            final DownloadListRepository downloadListRepository = new DownloadListRepository ();
-            final List <DownloadList> downloadLists = downloadListRepository.findAll ();
+            final DownloadListService downloadListService = new DownloadListService ();
+            final List <DownloadList> downloadLists = downloadListService.findAll ();
             if (downloadLists != null) downloadList.getItems ().addAll (downloadLists);
         }).start ();
     }

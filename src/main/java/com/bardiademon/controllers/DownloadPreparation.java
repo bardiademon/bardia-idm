@@ -2,19 +2,20 @@ package com.bardiademon.controllers;
 
 import com.bardiademon.GetInfoLink;
 import com.bardiademon.Main;
+import com.bardiademon.models.Groups.Groups;
+import com.bardiademon.models.Groups.GroupsService;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public final class DownloadPreparation implements Initializable
@@ -71,6 +72,17 @@ public final class DownloadPreparation implements Initializable
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
         txtURL.setText (DownloadPreparation.url);
+
+        final GroupsService groupsService = new GroupsService ();
+
+        final List <Groups> groups = groupsService.getGroups ();
+
+        if (groups != null)
+        {
+            for (final Groups group : groups)
+                this.groups.getItems ().addAll (String.format ("%s %s" , group.getName () , group.getExtensions ().toString ()));
+        }
+
         onClickTxtConnectionMessage ();
     }
 

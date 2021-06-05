@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DownloadListRepository
+public final class DownloadListService
 {
     private static final String TABLE_NAME = "download_list";
 
