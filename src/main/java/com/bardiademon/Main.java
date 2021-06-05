@@ -7,31 +7,46 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.io.IOException;
 import java.net.URL;
 
 public final class Main extends Application
 {
-
     public static final Database DATABASE = new Database ();
 
     @Override
-    public void start (final Stage primaryStage) throws Exception
+    public void start (final Stage primaryStage)
     {
-        final URL resource = (getClass ().getClassLoader ()).getResource ("main.fxml");
-        if (resource != null)
+        Launch ("Main" , "Bardia IDM");
+    }
+
+    public static Stage Launch (final String FXMLFilename , final String title)
+    {
+        try
         {
-            final Parent root = FXMLLoader.load (resource);
-            primaryStage.setTitle ("Hello World");
-            primaryStage.setScene (new Scene (root));
-            primaryStage.show ();
+            final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
+            if (resource != null)
+            {
+                final Stage stage = new Stage ();
+                stage.setTitle (title);
+                stage.setScene (new Scene (FXMLLoader.load (resource)));
+                stage.show ();
+
+                return stage;
+            }
+            else Log.N (new Exception ("Resource is null."));
         }
-        else System.out.println ("Resource is null.");
+        catch (final IOException e)
+        {
+            Log.N (e);
+        }
+
+        return null;
     }
 
     public static void main (final String[] args)
     {
-        if (DATABASE.connected ())
-            launch (args);
+        if (DATABASE.connected ()) launch (args);
         else Log.N (new Exception ("Database not connected!"));
     }
 

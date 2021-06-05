@@ -72,7 +72,10 @@ public final class MainController implements Initializable
         final TableColumn <DownloadList, Boolean> createdDir = new TableColumn <> ("Created Dir");
         createdDir.setCellValueFactory (new PropertyValueFactory <> ("createdDir"));
 
-        downloadList.getColumns ().addAll (Arrays.asList (id , link , path , size , startedAt , endAt , time , downloaded , createdDir));
+        final TableColumn <DownloadList, Boolean> description = new TableColumn <> ("Description");
+        description.setCellValueFactory (new PropertyValueFactory <> ("description"));
+
+        downloadList.getColumns ().addAll (Arrays.asList (id , link , path , size , startedAt , endAt , time , downloaded , createdDir , description));
 
         new Thread (() ->
         {
@@ -84,6 +87,6 @@ public final class MainController implements Initializable
 
     public void onClickAddUrl (final ActionEvent actionEvent)
     {
-
+        AddUrlController.Launch (DownloadPreparation::Launch);
     }
 }

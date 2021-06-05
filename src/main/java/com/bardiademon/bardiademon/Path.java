@@ -5,7 +5,8 @@ import java.io.File;
 public final class Path
 {
     public static final String DATA = Get (System.getProperty ("user.dir") , "data"),
-            DB = Get (DATA , "db.sqlite");
+            DB = Get (DATA , "db.sqlite"),
+            DOWNLOAD_JAR = Get (DATA , "Download.jar");
 
     public static String Get (String... paths)
     {

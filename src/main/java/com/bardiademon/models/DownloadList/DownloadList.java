@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public final class DownloadList
 {
     private long id;
-    private String link, path;
+    private String link, path, description;
     private LocalDateTime startedAt, endAt;
 
     // timei ke download start shode va tamom shode , modat zamani ke download tol keshide
@@ -107,6 +107,16 @@ public final class DownloadList
         this.size = size;
     }
 
+    public void setDescription (String description)
+    {
+        this.description = description;
+    }
+
+    public String getDescription ()
+    {
+        return description;
+    }
+
     @Override
     public String toString ()
     {
@@ -114,6 +124,7 @@ public final class DownloadList
                 "id=" + id +
                 ", link='" + link + '\'' +
                 ", path='" + path + '\'' +
+                ", description='" + description + '\'' +
                 ", startedAt=" + startedAt +
                 ", endAt=" + endAt +
                 ", time=" + time +
