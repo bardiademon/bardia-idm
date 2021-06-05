@@ -1,5 +1,7 @@
 package com.bardiademon;
 
+import com.bardiademon.bardiademon.Log;
+import com.bardiademon.models.Database;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,10 +12,12 @@ import java.net.URL;
 public final class Main extends Application
 {
 
+    public static final Database DATABASE = new Database ();
+
     @Override
     public void start (final Stage primaryStage) throws Exception
     {
-        final URL resource = (getClass ().getClassLoader ()).getResource ("sample.fxml");
+        final URL resource = (getClass ().getClassLoader ()).getResource ("main.fxml");
         if (resource != null)
         {
             final Parent root = FXMLLoader.load (resource);
@@ -26,6 +30,13 @@ public final class Main extends Application
 
     public static void main (final String[] args)
     {
-        launch (args);
+        if (DATABASE.connected ())
+            launch (args);
+        else Log.N (new Exception ("Database not connected!"));
+    }
+
+    public static Database Database ()
+    {
+        return DATABASE;
     }
 }

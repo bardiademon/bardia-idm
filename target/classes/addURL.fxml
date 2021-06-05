@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="91.0" prefWidth="837.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+    <children>
+        <TextField fx:id="txtUrl" layoutX="55.0" layoutY="14.0" prefHeight="25.0" prefWidth="768.0" />
+        <Text layoutX="14.0" layoutY="31.0" strokeType="OUTSIDE" strokeWidth="0.0" text="URL" wrappingWidth="43.0703125" />
+        <Button fx:id="btnAddUrl" layoutX="711.0" layoutY="52.0" mnemonicParsing="false" onAction="#onClickBtnAddUrl" prefHeight="25.0" prefWidth="112.0" text="Add" />
+    </children>
+</AnchorPane>
