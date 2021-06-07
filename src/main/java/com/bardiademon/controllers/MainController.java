@@ -1,14 +1,15 @@
 package com.bardiademon.controllers;
 
+import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -40,6 +41,7 @@ public final class MainController implements Initializable
 
     @FXML
     public TableView <DownloadList> downloadList;
+    private List <DownloadList> downloadLists;
 
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
@@ -54,7 +56,7 @@ public final class MainController implements Initializable
         final TableColumn <DownloadList, String> path = new TableColumn <> ("Path");
         path.setCellValueFactory (new PropertyValueFactory <> ("path"));
 
-        final TableColumn <DownloadList, Long> size = new TableColumn <> ("Size");
+        final TableColumn <DownloadList, String> size = new TableColumn <> ("Size");
         size.setCellValueFactory (new PropertyValueFactory <> ("size"));
 
         final TableColumn <DownloadList, LocalDateTime> startedAt = new TableColumn <> ("Started At");
@@ -80,13 +82,31 @@ public final class MainController implements Initializable
         new Thread (() ->
         {
             final DownloadListService downloadListService = new DownloadListService ();
-            final List <DownloadList> downloadLists = downloadListService.findAll ();
+            downloadLists = downloadListService.findAll ();
             if (downloadLists != null) downloadList.getItems ().addAll (downloadLists);
         }).start ();
     }
 
-    public void onClickAddUrl (final ActionEvent actionEvent)
+    public void onClickAddUrl ()
     {
-        AddUrlController.Launch (DownloadPreparation::Launch);
+        AddUrlController.Launch (URL -> DownloadPreparation.Launch (URL , null));
+    }
+
+    public void onClickTableView ()
+    {
+        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0)
+        {
+            try
+            {
+                final DownloadList downloadList = downloadLists.get (selectedIndex);
+                DownloadPreparation.Launch (null , downloadList);
+            }
+            catch (final Exception e)
+            {
+                Log.N (e);
+            }
+
+        }
     }
 }

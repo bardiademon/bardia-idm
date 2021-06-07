@@ -1,10 +1,10 @@
 package com.bardiademon;
 
+import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.Database;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -17,31 +17,34 @@ public final class Main extends Application
     @Override
     public void start (final Stage primaryStage)
     {
-        Launch ("Main" , "Bardia IDM");
+        Launch ("Main" , Default.APP_NAME , null);
     }
 
-    public static Stage Launch (final String FXMLFilename , final String title)
+    public static <T> void Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
     {
-        try
+        final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
+        if (resource != null)
         {
-            final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
-            if (resource != null)
+            final FXMLLoader fxmlLoader = new FXMLLoader (resource);
+            final Stage stage = new Stage ();
+            stage.setTitle (Title);
+            try
             {
-                final Stage stage = new Stage ();
-                stage.setTitle (title);
-                stage.setScene (new Scene (FXMLLoader.load (resource)));
+                stage.setScene (new Scene (fxmlLoader.load ()));
+                if (_Controller != null) _Controller.GetController (fxmlLoader.getController () , stage);
                 stage.show ();
-
-                return stage;
             }
-            else Log.N (new Exception ("Resource is null."));
+            catch (final IOException e)
+            {
+                Log.N (e);
+            }
         }
-        catch (final IOException e)
-        {
-            Log.N (e);
-        }
+        else Log.N (new Exception ("Resource is null."));
+    }
 
-        return null;
+    public interface Controller<T>
+    {
+        void GetController (final T t , final Stage stage);
     }
 
     public static void main (final String[] args)

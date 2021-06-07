@@ -1,7 +1,7 @@
 package com.bardiademon.controllers;
 
 import com.bardiademon.Main;
-import javafx.event.ActionEvent;
+import com.bardiademon.bardiademon.Default;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -12,10 +12,12 @@ import java.util.ResourceBundle;
 
 public final class AddUrlController implements Initializable
 {
-    private static EnterUrl enterUrl;
+    private static final String TITLE = "Add URL - " + Default.APP_NAME;
+
+    private EnterUrl enterUrl;
     public TextField txtUrl;
     public Button btnAddUrl;
-    private static Stage stage;
+    private Stage stage;
 
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
@@ -23,7 +25,7 @@ public final class AddUrlController implements Initializable
 
     }
 
-    public void onClickBtnAddUrl (final ActionEvent actionEvent)
+    public void onClickBtnAddUrl ()
     {
         if (!txtUrl.getText ().isEmpty ())
         {
@@ -35,7 +37,7 @@ public final class AddUrlController implements Initializable
         }
         else
         {
-            Alert alert = new Alert (Alert.AlertType.ERROR);
+            final Alert alert = new Alert (Alert.AlertType.ERROR);
             alert.setTitle ("Empty url");
             alert.setHeaderText ("Is Empty URL");
             alert.setContentText ("You must enter an address");
@@ -45,8 +47,11 @@ public final class AddUrlController implements Initializable
 
     public static void Launch (final EnterUrl enterUrl)
     {
-        AddUrlController.enterUrl = enterUrl;
-        stage = Main.Launch ("AddURL" , "Add URL - Bardia IDM");
+        Main.Launch ("AddURL" , TITLE , (Main.Controller <AddUrlController>) (addUrlController , stage) ->
+        {
+            addUrlController.enterUrl = enterUrl;
+            addUrlController.stage = stage;
+        });
     }
 
     public interface EnterUrl

@@ -1,5 +1,6 @@
 package com.bardiademon.models.DownloadList;
 
+import com.bardiademon.bardiademon.GetSize;
 import java.time.LocalDateTime;
 
 public final class DownloadList
@@ -97,7 +98,12 @@ public final class DownloadList
         this.createdDir = createdDir;
     }
 
-    public long getSize ()
+    public String getSize ()
+    {
+        return GetSize.Get (size);
+    }
+
+    public long getByteSize ()
     {
         return size;
     }
