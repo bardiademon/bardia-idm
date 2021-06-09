@@ -4,6 +4,7 @@ import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.Database;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -25,19 +26,22 @@ public final class Main extends Application
         final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
         if (resource != null)
         {
-            final FXMLLoader fxmlLoader = new FXMLLoader (resource);
-            final Stage stage = new Stage ();
-            stage.setTitle (Title);
-            try
+            Platform.runLater (() ->
             {
-                stage.setScene (new Scene (fxmlLoader.load ()));
-                if (_Controller != null) _Controller.GetController (fxmlLoader.getController () , stage);
-                stage.show ();
-            }
-            catch (final IOException e)
-            {
-                Log.N (e);
-            }
+                final FXMLLoader fxmlLoader = new FXMLLoader (resource);
+                final Stage stage = new Stage ();
+                stage.setTitle (Title);
+                try
+                {
+                    stage.setScene (new Scene (fxmlLoader.load ()));
+                    if (_Controller != null) _Controller.GetController (fxmlLoader.getController () , stage);
+                    stage.show ();
+                }
+                catch (final IOException e)
+                {
+                    Log.N (e);
+                }
+            });
         }
         else Log.N (new Exception ("Resource is null."));
     }

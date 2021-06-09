@@ -102,7 +102,14 @@ public final class DownloadPreparation implements Initializable
     @FXML
     public void onClickBtnDownloadNow ()
     {
-
+        DownloadingController.Launch (url , txtFilename.getText () , txtSaveAs.getText () , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
+        {
+            if (done)
+            {
+                saveToDownloadList ();
+                btnDownloadCancel ();
+            }
+        });
     }
 
     @FXML
