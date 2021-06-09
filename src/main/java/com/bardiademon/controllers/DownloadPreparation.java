@@ -148,7 +148,11 @@ public final class DownloadPreparation implements Initializable
                     downloadList.setStartedAt (LocalDateTime.now ());
                     return downloadListService.add (downloadList);
                 }
-                else return downloadListService.modify (downloadList);
+                else
+                {
+                    downloadListModify ();
+                    return downloadListService.modify (downloadList);
+                }
             }
         }
 
@@ -192,6 +196,9 @@ public final class DownloadPreparation implements Initializable
             public void Error (final String Error)
             {
                 txtConnectionMessage.setText (Error);
+
+                progress.setVisible (false);
+                txtConnectionMessage.setDisable (false);
             }
 
             @Override

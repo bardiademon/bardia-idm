@@ -2,12 +2,12 @@ package com.bardiademon.models.DownloadList;
 
 import com.bardiademon.Main;
 import com.bardiademon.bardiademon.Log;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -213,16 +213,20 @@ public final class DownloadListService
         {
             if (Main.Database ().connected ())
             {
-                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryModify () , ResultSet.TYPE_FORWARD_ONLY , ResultSet.CONCUR_UPDATABLE))
+                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryModify ()))
                 {
                     int counter = 0;
                     statement.setString (++counter , downloadList.getLink ());
                     statement.setString (++counter , downloadList.getPath ());
-                    statement.setTimestamp (++counter , Timestamp.valueOf (downloadList.getEndAt ()));
+
+                    final LocalDateTime endAt = downloadList.getEndAt ();
+                    statement.setTimestamp (++counter , (endAt != null ? Timestamp.valueOf (endAt) : null));
+
                     statement.setBoolean (++counter , downloadList.isCompleted ());
                     statement.setBoolean (++counter , downloadList.isCreatedDir ());
-                    statement.setTimestamp (++counter , Timestamp.valueOf (downloadList.getTime ()));
 
+                    final LocalDateTime time = downloadList.getTime ();
+                    statement.setTimestamp (++counter , (time != null ? Timestamp.valueOf (time) : null));
                     // where
                     statement.setLong (++counter , downloadList.getId ());
 
@@ -242,7 +246,7 @@ public final class DownloadListService
 
     private String makeQueryModify ()
     {
-        return String.format ("update \"%s\" set \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? where \"%s\"=?" ,
+        return String.format ("update \"%s\" set \"%s\"=? ,\"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? where \"%s\"=?" ,
                 TABLE_NAME ,
                 ColumnsNames.link , ColumnsNames.path , ColumnsNames.end_at , ColumnsNames.completed , ColumnsNames.created_dir , ColumnsNames.time ,
                 ColumnsNames.id);

@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
-
 public final class GetInfoLink extends Thread implements Runnable
 {
     private final String url;
@@ -17,6 +16,10 @@ public final class GetInfoLink extends Thread implements Runnable
     private boolean run = true;
     private boolean filename, filesize;
 
+    private Process process;
+    private InputStream out;
+    private OutputStream in;
+
     public GetInfoLink (final String url , final Callback callback)
     {
         this.url = url;
@@ -24,35 +27,21 @@ public final class GetInfoLink extends Thread implements Runnable
         start ();
     }
 
-    public static boolean isAlive (Process p)
-    {
-        try
-        {
-            p.exitValue ();
-            return false;
-        }
-        catch (IllegalThreadStateException e)
-        {
-            return true;
-        }
-    }
-
     @Override
     public void run ()
     {
-        Process process = null;
         try
         {
             final ProcessBuilder builder = new ProcessBuilder ("java" , "-jar" , Path.DOWNLOAD_JAR , "-ma" , "-q");
             builder.redirectErrorStream (true); // so we can ignore the error stream
             process = builder.start ();
-            final InputStream out = process.getInputStream ();
-            final OutputStream in = process.getOutputStream ();
+            out = process.getInputStream ();
+            in = process.getOutputStream ();
 
             final byte[] buffer = new byte[4000];
             writer = new PrintWriter (in);
 
-            while (isAlive (process) && run)
+            while (run)
             {
                 int no = out.available ();
                 if (no > 0)
@@ -68,9 +57,42 @@ public final class GetInfoLink extends Thread implements Runnable
         }
         catch (final IOException e)
         {
-            if (process != null) process.destroy ();
+            destroy ();
             Log.N (e);
             System.gc ();
+        }
+        finally
+        {
+            destroy ();
+        }
+    }
+
+    private void destroy ()
+    {
+        try
+        {
+            if (process != null && !run)
+            {
+                process.destroy ();
+                if (in != null)
+                {
+                    in.flush ();
+                    in.close ();
+                }
+                if (out != null) out.close ();
+
+                if (writer != null)
+                {
+                    writer.flush ();
+                    writer.close ();
+                }
+
+                System.gc ();
+            }
+        }
+        catch (final Exception e)
+        {
+            Log.N (e);
         }
     }
 
@@ -78,6 +100,7 @@ public final class GetInfoLink extends Thread implements Runnable
     {
         if (line != null)
         {
+            line = line.trim ();
             if (line.contains ("Link:"))
             {
                 writer.println (url);
@@ -98,12 +121,15 @@ public final class GetInfoLink extends Thread implements Runnable
             }
             else if (line.contains ("Download error =>"))
             {
+                filename = true;
+                filesize = true;
                 callback.Error (line);
                 line = "";
                 run = false;
             }
         }
         run = (!filename || !filesize);
+        destroy ();
     }
 
     public interface Callback
