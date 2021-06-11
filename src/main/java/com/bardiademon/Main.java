@@ -2,12 +2,14 @@ package com.bardiademon;
 
 import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.controllers.MainController;
 import com.bardiademon.models.Database;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import java.io.IOException;
 import java.net.URL;
 
@@ -18,8 +20,14 @@ public final class Main extends Application
     @Override
     public void start (final Stage primaryStage)
     {
-        Launch ("Main" , Default.APP_NAME , null);
+        Launch ("Main" , Default.APP_NAME , (Controller <MainController>) (main , stage) -> stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent ->
+        {
+            System.gc ();
+            Platform.exit ();
+            System.exit (0);
+        }));
     }
+
 
     public static <T> void Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
     {
@@ -30,6 +38,9 @@ public final class Main extends Application
             {
                 final FXMLLoader fxmlLoader = new FXMLLoader (resource);
                 final Stage stage = new Stage ();
+                stage.setResizable (false);
+
+
                 stage.setTitle (Title);
                 try
                 {

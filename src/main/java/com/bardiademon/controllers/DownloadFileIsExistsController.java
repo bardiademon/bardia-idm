@@ -1,7 +1,8 @@
 package com.bardiademon.controllers;
 
-import com.bardiademon.Download;
+import com.bardiademon.Downloder.Download.Download;
 import com.bardiademon.Main;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -37,8 +38,11 @@ public class DownloadFileIsExistsController
 
     private void stageClose ()
     {
-        stage.close ();
-        stage.hide ();
+        Platform.runLater (() ->
+        {
+            stage.close ();
+            stage.hide ();
+        });
     }
 
     @FXML
@@ -80,8 +84,11 @@ public class DownloadFileIsExistsController
         {
             controller.result = _Result;
             controller.stage = stage;
-            controller.txtFilename.setText (Filename);
-            controller.btnResume.setDisable (!Resume);
+            Platform.runLater (() ->
+            {
+                controller.txtFilename.setText (Filename);
+                controller.btnResume.setDisable (!Resume);
+            });
         });
     }
 

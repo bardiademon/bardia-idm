@@ -1,8 +1,10 @@
 package com.bardiademon.controllers;
 
-import com.bardiademon.GetInfoLink;
+import com.bardiademon.Downloder.Download.Download;
+import com.bardiademon.Downloder.Download.OnInfoLink;
 import com.bardiademon.Main;
 import com.bardiademon.bardiademon.Default;
+import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
@@ -25,6 +27,8 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -102,31 +106,41 @@ public final class DownloadPreparation implements Initializable
     @FXML
     public void onClickBtnDownloadNow ()
     {
-        DownloadingController.Launch (url , txtFilename.getText () , txtSaveAs.getText () , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
+        final String filename = txtFilename.getText ();
+        final String saveAs = txtSaveAs.getText ();
+
+        if (notEmpty (filename) && notEmpty (saveAs))
         {
-            if (done)
+            DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
             {
-                saveToDownloadList ();
-                btnDownloadCancel ();
-            }
-        });
+                if (done)
+                {
+                    saveToDownloadList (true);
+                    btnDownloadCancel ();
+                }
+            });
+        }
+        else showAlert ("Empty" , "Info is empty" , "Filename Or Save As");
     }
 
     @FXML
     public void btnDownloadCancel ()
     {
-        downloadPreparation.close ();
-        downloadPreparation.hide ();
+        Platform.runLater (() ->
+        {
+            downloadPreparation.close ();
+            downloadPreparation.hide ();
+        });
         System.gc ();
     }
 
     @FXML
     public void onClickBtnDownloadLater ()
     {
-        if (saveToDownloadList ()) btnDownloadCancel ();
+        if (saveToDownloadList (false)) btnDownloadCancel ();
     }
 
-    private boolean saveToDownloadList ()
+    private boolean saveToDownloadList (final boolean completed)
     {
         final String url = txtURL.getText ();
         if (notEmpty (url) && notEmpty (txtPath.getText ()) && notEmpty (txtFilename.getText ()))
@@ -153,11 +167,12 @@ public final class DownloadPreparation implements Initializable
                     downloadList.setDescription (txtDescription.getText ());
                     downloadList.setCreatedDir (chkCreateFolder.isSelected ());
                     downloadList.setStartedAt (LocalDateTime.now ());
+                    downloadList.setCompleted (completed);
                     return downloadListService.add (downloadList);
                 }
                 else
                 {
-                    downloadListModify ();
+                    downloadListModify (completed);
                     return downloadListService.modify (downloadList);
                 }
             }
@@ -183,52 +198,56 @@ public final class DownloadPreparation implements Initializable
         txtConnectionMessage.setText ("Connecting...");
         progress.setVisible (true);
         txtConnectionMessage.setDisable (true);
-        new GetInfoLink (url , new GetInfoLink.Callback ()
+        new Download (url , new OnInfoLink ()
         {
             @Override
-            public void Filename (final String Filename)
+            public String OnEnterLink ()
+            {
+                return url;
+            }
+
+            @Override
+            public boolean OnConnected (final long Size , final File Path)
+            {
+                txtConnectionMessage.setText ("Connected");
+                txtFilesize.setText ("Filesize: " + GetSize.Get (Size));
+                return true;
+            }
+
+            @Override
+            public void OnFilename (final String Filename)
             {
                 txtFilename.clear ();
                 txtFilename.setText (Filename);
-            }
 
-            @Override
-            public void Filesize (final String Filesize)
-            {
-                txtConnectionMessage.setText ("Connected");
-                txtFilesize.setText ("Filesize: " + Filesize);
-            }
-
-            @Override
-            public void Error (final String Error)
-            {
-                txtConnectionMessage.setText (Error);
-
-                progress.setVisible (false);
-                txtConnectionMessage.setDisable (false);
-            }
-
-            @Override
-            public void OK ()
-            {
                 progress.setVisible (false);
                 txtConnectionMessage.setDisable (false);
 
                 if (txtConnectionMessage.getText ().contains ("Connected") && !txtFilename.getText ().isEmpty ())
                     setGroup ();
 
-                downloadListModify ();
+                downloadListModify (false);
+            }
+
+            @Override
+            public void OnError (final Exception E)
+            {
+                txtConnectionMessage.setText (E.getMessage ());
+
+                progress.setVisible (false);
+                txtConnectionMessage.setDisable (false);
             }
         });
     }
 
-    private void downloadListModify ()
+    private void downloadListModify (final boolean completed)
     {
         if (downloadList != null && downloadList.getId () > 0)
         {
             downloadList.setCreatedDir (chkCreateFolder.isSelected ());
             downloadList.setLink (txtURL.getText ());
             downloadList.setPath (txtSaveAs.getText ());
+            if (!downloadList.isCompleted ()) downloadList.setCompleted (completed);
         }
     }
 
@@ -237,6 +256,8 @@ public final class DownloadPreparation implements Initializable
         if (groupsInfo != null && groupsInfo.size () > 0)
         {
             final String extension = FilenameUtils.getExtension (txtFilename.getText ());
+
+            final String path = txtPath.getText ();
             for (int i = 0, len = groupsInfo.size (); i < len; i++)
             {
                 final Groups group = groupsInfo.get (i);
@@ -244,7 +265,7 @@ public final class DownloadPreparation implements Initializable
                 {
                     final int finalI = i;
                     Platform.runLater (() -> this.groups.getSelectionModel ().select (finalI));
-                    setTxtPath (group.getDefaultPath () , txtFilename.getText ());
+                    if (!notEmpty (path)) setTxtPath (group.getDefaultPath () , txtFilename.getText ());
                     return;
                 }
             }
@@ -253,7 +274,7 @@ public final class DownloadPreparation implements Initializable
 
     private void setTxtPath (final String path , final String filename)
     {
-        txtFilename.setText (filename);
+        Platform.runLater (() -> txtFilename.setText (URLDecoder.decode (filename , StandardCharsets.UTF_8)));
         setTxtPath (path , true);
         setTxtSaveAs ();
     }
@@ -265,12 +286,15 @@ public final class DownloadPreparation implements Initializable
 
     private void setTxtPath (final String path , final boolean set)
     {
-        if (set) txtPath.setText (path);
+        if (set) Platform.runLater (() -> txtPath.setText (path));
         final File file = new File (path);
 
         final boolean exists = file.exists ();
-        txtPathStatus.setText (String.format ("Path is %s" , (exists ? "exists" : "not exists (Click to create a folder)")));
-        txtPathStatus.setFill (((exists) ? Color.valueOf ("#0C8929") : Color.valueOf ("#B44410")));
+        Platform.runLater (() ->
+        {
+            txtPathStatus.setText (String.format ("Path is %s" , (exists ? "exists" : "not exists (Click to create a folder)")));
+            txtPathStatus.setFill (((exists) ? Color.valueOf ("#0C8929") : Color.valueOf ("#B44410")));
+        });
     }
 
     public void onClickBtnChoosePath ()
@@ -310,7 +334,7 @@ public final class DownloadPreparation implements Initializable
 
     private void setTxtSaveAs ()
     {
-        txtSaveAs.setText (new File (String.format ("%s%s%s" , txtPath.getText () , File.separator , txtFilename.getText ())).getPath ());
+        Platform.runLater (() -> txtSaveAs.setText (new File (String.format ("%s%s%s" , txtPath.getText () , File.separator , txtFilename.getText ())).getPath ()));
     }
 
     public void onClickTxtStatusPath ()
@@ -341,16 +365,11 @@ public final class DownloadPreparation implements Initializable
             this.downloadList = downloadList;
 
             setTxtPath (new File (downloadList.getPath ()).getParent () , FilenameUtils.getName (downloadList.getPath ()));
-            this.url = downloadList.getLink ();
-            txtURL.setText (this.url);
+            setTxtURL (downloadList.getLink ());
             txtDescription.setText (downloadList.getDescription ());
             chkCreateFolder.setSelected (downloadList.isCreatedDir ());
         }
-        else
-        {
-            this.url = url;
-            txtURL.setText (this.url);
-        }
+        else setTxtURL (url);
 
         this.downloadPreparation = downloadPreparation;
 
@@ -366,6 +385,12 @@ public final class DownloadPreparation implements Initializable
         }
 
         onClickTxtConnectionMessage ();
+    }
+
+    private void setTxtURL (final String url)
+    {
+        this.url = url;
+        Platform.runLater (() -> txtURL.setText (URLDecoder.decode (url , StandardCharsets.UTF_8)));
     }
 
     private void showAlert (final String title , final String headerText , final String content)
