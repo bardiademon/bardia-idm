@@ -6,7 +6,7 @@ public final class Path
 {
     public static final String DATA = Get (System.getProperty ("user.dir") , "data"),
             DB = Get (DATA , "db.sqlite"),
-            DOWNLOAD_JAR = Get (DATA , "Download.jar");
+            IMAGES = Get (DATA , "images"), IC_DOWNLOADED = Get (IMAGES , "ic_downloaded.png");
 
     public static String Get (String... paths)
     {

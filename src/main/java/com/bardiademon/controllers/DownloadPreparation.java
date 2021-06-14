@@ -31,6 +31,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 public final class DownloadPreparation implements Initializable
@@ -108,8 +109,9 @@ public final class DownloadPreparation implements Initializable
     {
         final String filename = txtFilename.getText ();
         final String saveAs = txtSaveAs.getText ();
+        url = txtURL.getText ();
 
-        if (notEmpty (filename) && notEmpty (saveAs))
+        if (notEmpty (filename) && notEmpty (saveAs) && notEmpty (url) && txtConnectionMessage.getText ().toLowerCase (Locale.ROOT).contains ("connected"))
         {
             DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
             {
@@ -120,7 +122,7 @@ public final class DownloadPreparation implements Initializable
                 }
             });
         }
-        else showAlert ("Empty" , "Info is empty" , "Filename Or Save As");
+        else showAlert ("Check info" , "Please check info" , "Filename Or Save As Or URL");
     }
 
     @FXML

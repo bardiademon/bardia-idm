@@ -3,6 +3,7 @@ package com.bardiademon.controllers;
 import com.bardiademon.Downloder.Download.Download;
 import com.bardiademon.Downloder.Download.On;
 import com.bardiademon.Main;
+import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
 import javafx.application.Platform;
 
@@ -200,7 +201,8 @@ public class DownloadingController implements On
     @Override
     public void OnDownloaded (final File Path)
     {
-        alert (Alert.AlertType.INFORMATION , "Downloaded" , Path.getAbsolutePath () , "Downloaded was completed");
+//        alert (Alert.AlertType.INFORMATION , "Downloaded" , Path.getAbsolutePath () , "Downloaded was completed");
+        AfterDownloadController.Launch (txtURL.getText () , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ());
         close (true);
     }
 

@@ -50,6 +50,7 @@ public final class Main extends Application
                 }
                 catch (final IOException e)
                 {
+                    e.printStackTrace ();
                     Log.N (e);
                 }
             });
