@@ -33,6 +33,13 @@
             <version>2.9.0</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/io.github.url-detector/url-detector -->
+        <dependency>
+            <groupId>io.github.url-detector</groupId>
+            <artifactId>url-detector</artifactId>
+            <version>0.1.23</version>
+        </dependency>
+
 
     </dependencies>
 

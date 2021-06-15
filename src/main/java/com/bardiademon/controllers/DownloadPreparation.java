@@ -6,6 +6,7 @@ import com.bardiademon.Main;
 import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
 import com.bardiademon.models.Groups.Groups;
@@ -397,10 +398,6 @@ public final class DownloadPreparation implements Initializable
 
     private void showAlert (final String title , final String headerText , final String content)
     {
-        final Alert alert = new Alert (Alert.AlertType.ERROR);
-        alert.setTitle (title);
-        alert.setHeaderText (headerText);
-        alert.setContentText (content);
-        alert.showAndWait ();
+        ShowMessage.Show (Alert.AlertType.ERROR , title , headerText , content);
     }
 }

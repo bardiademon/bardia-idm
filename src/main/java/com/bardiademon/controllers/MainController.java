@@ -3,13 +3,13 @@ package com.bardiademon.controllers;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -108,5 +108,11 @@ public final class MainController implements Initializable
             }
 
         }
+    }
+
+    @FXML
+    public void onClickBtnAddListUrl ()
+    {
+        ListUrlController.Launch ();
     }
 }

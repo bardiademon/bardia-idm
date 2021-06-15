@@ -5,6 +5,7 @@ import com.bardiademon.Downloder.Download.On;
 import com.bardiademon.Main;
 import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.bardiademon.ShowMessage;
 import javafx.application.Platform;
 
 import javafx.fxml.FXML;
@@ -201,7 +202,6 @@ public class DownloadingController implements On
     @Override
     public void OnDownloaded (final File Path)
     {
-//        alert (Alert.AlertType.INFORMATION , "Downloaded" , Path.getAbsolutePath () , "Downloaded was completed");
         AfterDownloadController.Launch (txtURL.getText () , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ());
         close (true);
     }
@@ -209,7 +209,7 @@ public class DownloadingController implements On
     @Override
     public void OnErrorDownloading (final Exception E)
     {
-        alert (Alert.AlertType.ERROR , "Error" , "Downloading error" , "Error: " + E.getMessage ());
+        alert ("Downloading error" , "Error: " + E.getMessage ());
         close (false);
     }
 
@@ -221,16 +221,9 @@ public class DownloadingController implements On
         this.resumeDownload = resumeDownload;
     }
 
-    private void alert (final Alert.AlertType alertType , final String title , final String header , final String content)
+    private void alert (final String header , final String content)
     {
-        Platform.runLater (() ->
-        {
-            final Alert alert = new Alert (alertType);
-            alert.setTitle (title);
-            alert.setHeaderText (header);
-            alert.setContentText (content);
-            alert.show ();
-        });
+        ShowMessage.Show (Alert.AlertType.ERROR , "Error" , header , content);
     }
 
     @Override
@@ -278,7 +271,7 @@ public class DownloadingController implements On
     @Override
     public void OnCompulsoryStopCloseStreamError (final Exception e)
     {
-        alert (Alert.AlertType.ERROR , "Error" , "Close download error" , "Error compulsory stop > " + e.getMessage ());
+        alert ("Close download error" , "Error compulsory stop > " + e.getMessage ());
     }
 
     @Override
