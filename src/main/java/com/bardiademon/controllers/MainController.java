@@ -3,7 +3,7 @@ package com.bardiademon.controllers;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -35,9 +35,6 @@ public final class MainController implements Initializable
 
     @FXML
     public Button btnDeleteCompleted;
-
-    @FXML
-    public Button btnAddListUrl;
 
     @FXML
     public TableView <DownloadList> downloadList;
@@ -79,11 +76,17 @@ public final class MainController implements Initializable
 
         downloadList.getColumns ().addAll (Arrays.asList (id , link , path , size , startedAt , endAt , time , downloaded , createdDir , description));
 
+        refresh ();
+    }
+
+    public void refresh ()
+    {
+        if (downloadList.getItems ().size () > 0) downloadList.getItems ().clear ();
         new Thread (() ->
         {
             final DownloadListService downloadListService = new DownloadListService ();
             downloadLists = downloadListService.findAll ();
-            if (downloadLists != null) downloadList.getItems ().addAll (downloadLists);
+            if (downloadLists != null) Platform.runLater (() -> downloadList.getItems ().addAll (downloadLists));
         }).start ();
     }
 

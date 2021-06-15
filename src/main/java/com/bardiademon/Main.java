@@ -17,17 +17,27 @@ public final class Main extends Application
 {
     public static final Database DATABASE = new Database ();
 
+    public static MainController mainController;
+
     @Override
     public void start (final Stage primaryStage)
     {
-        Launch ("Main" , Default.APP_NAME , (Controller <MainController>) (main , stage) -> stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent ->
+        Launch ("Main" , Default.APP_NAME , (Controller <MainController>) (main , stage) ->
         {
-            System.gc ();
-            Platform.exit ();
-            System.exit (0);
-        }));
+            mainController = main;
+            stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent ->
+            {
+                System.gc ();
+                Platform.exit ();
+                System.exit (0);
+            });
+        });
     }
 
+    public static MainController getMainController ()
+    {
+        return mainController;
+    }
 
     public static <T> void Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
     {

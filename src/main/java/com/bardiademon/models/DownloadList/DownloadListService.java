@@ -24,7 +24,7 @@ public final class DownloadListService
     {
         if (Main.Database ().connected ())
         {
-            if (downloadList.getLink () != null && downloadList.getStartedAt () != null && downloadList.getByteSize () > 0)
+            if (downloadList.getLink () != null)
             {
                 try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryAdd ()))
                 {
@@ -32,7 +32,10 @@ public final class DownloadListService
                     statement.setString (++counter , downloadList.getLink ());
                     statement.setString (++counter , downloadList.getPath ());
                     statement.setBoolean (++counter , downloadList.isCreatedDir ());
-                    statement.setTimestamp (++counter , Timestamp.valueOf (downloadList.getStartedAt ()));
+
+                    final LocalDateTime startedAt = downloadList.getStartedAt ();
+                    statement.setTimestamp (++counter , (startedAt == null ? null : Timestamp.valueOf (startedAt)));
+
                     statement.setLong (++counter , downloadList.getByteSize ());
 
                     Log.N ("Added");

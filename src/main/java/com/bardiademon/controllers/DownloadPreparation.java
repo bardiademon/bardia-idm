@@ -179,6 +179,7 @@ public final class DownloadPreparation implements Initializable
                     return downloadListService.modify (downloadList);
                 }
             }
+            Main.getMainController ().refresh ();
         }
 
         showAlert ("Error save" , "Error save to download list" , "Check download info");
@@ -289,6 +290,8 @@ public final class DownloadPreparation implements Initializable
 
     private void setTxtPath (final String path , final boolean set)
     {
+        if (path == null) return;
+
         if (set) Platform.runLater (() -> txtPath.setText (path));
         final File file = new File (path);
 
@@ -367,7 +370,9 @@ public final class DownloadPreparation implements Initializable
         {
             this.downloadList = downloadList;
 
-            setTxtPath (new File (downloadList.getPath ()).getParent () , FilenameUtils.getName (downloadList.getPath ()));
+            if (downloadList.getPath () != null)
+                setTxtPath (new File (downloadList.getPath ()).getParent () , FilenameUtils.getName (downloadList.getPath ()));
+
             setTxtURL (downloadList.getLink ());
             txtDescription.setText (downloadList.getDescription ());
             chkCreateFolder.setSelected (downloadList.isCreatedDir ());

@@ -147,7 +147,7 @@ public final class ListUrlController implements Initializable
     @FXML
     public void onClickBtnDownloadNow ()
     {
-        
+
     }
 
     @FXML
@@ -155,13 +155,17 @@ public final class ListUrlController implements Initializable
     {
         if (list.getItems ().size () > 0)
         {
-            final ObservableList <String> items = list.getItems ();
-            for (final String item : items)
+            new Thread (() ->
             {
-                final DownloadList downloadList = new DownloadList ();
-                downloadList.setLink (item);
-                downloadListService.add (downloadList);
-            }
+                final ObservableList <String> items = list.getItems ();
+                for (final String item : items)
+                {
+                    final DownloadList downloadList = new DownloadList ();
+                    downloadList.setLink (item);
+                    downloadListService.add (downloadList);
+                }
+                Main.getMainController ().refresh ();
+            }).start ();
             onClickBtnCancel ();
         }
     }
