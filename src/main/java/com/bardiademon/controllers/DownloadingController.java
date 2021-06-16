@@ -26,7 +26,7 @@ public class DownloadingController implements On
 {
 
     private String url, filename, path;
-    private boolean createDir, theNameHasNoSuffix;
+    private boolean createDir, theNameHasNoSuffix, toHttps;
     private Stage stage;
     private DownloadResult downloadResult;
     private Download download;
@@ -88,7 +88,7 @@ public class DownloadingController implements On
         close (false);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final DownloadResult _DownloadResult)
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
     {
         Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
         {
@@ -99,6 +99,7 @@ public class DownloadingController implements On
             controller.theNameHasNoSuffix = TheNameHasNoSuffix;
             controller.stage = stage;
             controller.downloadResult = _DownloadResult;
+            controller.toHttps = ToHttps;
             controller.run ();
 
             controller.stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> new Thread (() ->
@@ -110,7 +111,7 @@ public class DownloadingController implements On
     private void run ()
     {
         txtURL.setText (url);
-        download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , this);
+        download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , toHttps , this);
     }
 
     @Override

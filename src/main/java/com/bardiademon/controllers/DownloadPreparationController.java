@@ -18,6 +18,7 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -35,7 +36,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public final class DownloadPreparation implements Initializable
+public final class DownloadPreparationController implements Initializable
 {
     private static final String TITLE = "Downloaded Preparation - " + Default.APP_NAME;
 
@@ -90,6 +91,9 @@ public final class DownloadPreparation implements Initializable
     @FXML
     public ProgressBar progress;
 
+    @FXML
+    public CheckBox chkToHttps;
+
     private Stage downloadPreparation;
     private String url;
 
@@ -116,7 +120,7 @@ public final class DownloadPreparation implements Initializable
 
         if (notEmpty (filename) && notEmpty (saveAs) && notEmpty (url) && txtConnectionMessage.getText ().toLowerCase (Locale.ROOT).contains ("connected"))
         {
-            DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
+            DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
             {
                 if (done)
                 {
@@ -188,11 +192,13 @@ public final class DownloadPreparation implements Initializable
     public static void Launch (final String URL , final DownloadList _DownloadList)
     {
         Main.Launch ("DownloadPreparation" , TITLE ,
-                (Main.Controller <DownloadPreparation>) (controller , stage) -> controller.load (URL , _DownloadList , stage));
+                (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage));
     }
 
     public void onClickTxtConnectionMessage ()
     {
+        if (url.contains ("http://") && chkToHttps.isSelected ()) setTxtURL (url);
+        
         txtConnectionMessage.setText ("Connecting...");
         progress.setVisible (true);
         txtConnectionMessage.setDisable (true);
@@ -239,7 +245,7 @@ public final class DownloadPreparation implements Initializable
                 progress.setVisible (false);
                 txtConnectionMessage.setDisable (false);
             }
-        });
+        } , chkToHttps.isSelected ());
     }
 
     private void downloadListModify (final boolean completed)
@@ -284,6 +290,7 @@ public final class DownloadPreparation implements Initializable
     public void onKeyReleasedTxtURL ()
     {
         url = txtURL.getText ();
+        onClickTxtConnectionMessage ();
     }
 
     private void setTxtPath (final String path , final boolean set)
@@ -396,11 +403,18 @@ public final class DownloadPreparation implements Initializable
     private void setTxtURL (final String url)
     {
         this.url = url;
-        Platform.runLater (() -> txtURL.setText (URLDecoder.decode (url , StandardCharsets.UTF_8)));
+        Platform.runLater (() -> txtURL.setText (URLDecoder.decode (((chkToHttps.isSelected () ? url.replace ("http://" , "https://") : url)) , StandardCharsets.UTF_8)));
     }
 
     private void showAlert (final String title , final String headerText , final String content)
     {
         ShowMessage.Show (Alert.AlertType.ERROR , title , headerText , content);
+    }
+
+    @FXML
+    public void onClickChkToHttps ()
+    {
+        setTxtURL (txtURL.getText ());
+        onClickTxtConnectionMessage ();
     }
 }

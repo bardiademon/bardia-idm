@@ -133,7 +133,7 @@ public final class MainController implements Initializable
 
     public void onClickAddUrl ()
     {
-        AddUrlController.Launch (URL -> DownloadPreparation.Launch (URL , null));
+        AddUrlController.Launch (URL -> DownloadPreparationController.Launch (URL , null));
     }
 
     public void onClickTableView ()
@@ -144,7 +144,7 @@ public final class MainController implements Initializable
             try
             {
                 final DownloadList downloadList = downloadLists.get (selectedIndex);
-                DownloadPreparation.Launch (null , downloadList);
+                DownloadPreparationController.Launch (null , downloadList);
             }
             catch (final Exception e)
             {
