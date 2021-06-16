@@ -1,11 +1,14 @@
 package com.bardiademon.controllers;
 
+import com.bardiademon.Main;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,6 +25,9 @@ public final class MainController implements Initializable
     public Button btnAddUrl;
 
     @FXML
+    public TableView <DownloadList> downloadList;
+
+    @FXML
     public Button btnResume;
 
     @FXML
@@ -34,11 +40,15 @@ public final class MainController implements Initializable
     public Button btnResumeAll;
 
     @FXML
-    public Button btnDeleteCompleted;
+    public Button btnClearList;
 
     @FXML
-    public TableView <DownloadList> downloadList;
+    public Button btnDeleteCompleted;
+
+
     private List <DownloadList> downloadLists;
+
+    private DownloadListService downloadListService;
 
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
@@ -81,13 +91,44 @@ public final class MainController implements Initializable
 
     public void refresh ()
     {
-        if (downloadList.getItems ().size () > 0) downloadList.getItems ().clear ();
         new Thread (() ->
         {
-            final DownloadListService downloadListService = new DownloadListService ();
+            Main.Database ().reconnect ();
+            clear ();
+            if (downloadListService == null) downloadListService = new DownloadListService ();
+
             downloadLists = downloadListService.findAll ();
-            if (downloadLists != null) Platform.runLater (() -> downloadList.getItems ().addAll (downloadLists));
+
+            final boolean isNullDownloadedList = downloadLists == null;
+
+            Platform.runLater (() ->
+            {
+                btnClearList.setDisable (isNullDownloadedList);
+                btnDeleteCompleted.setDisable (isNullDownloadedList);
+            });
+
+            if (!isNullDownloadedList)
+            {
+                boolean btnDeleteCompletedDisableFalse = false;
+                for (final DownloadList download : downloadLists)
+                {
+                    if (download.isCompleted () && !btnDeleteCompletedDisableFalse)
+                    {
+                        btnDeleteCompletedDisableFalse = true;
+                        Platform.runLater (() -> btnDeleteCompleted.setDisable (false));
+                    }
+                    Platform.runLater (() -> downloadList.getItems ().add (download));
+                }
+                Platform.runLater (() -> btnClearList.setDisable (false));
+            }
         }).start ();
+    }
+
+    private void clear ()
+    {
+        Platform.runLater (() -> downloadList.getItems ().clear ());
+        if (downloadLists != null) downloadLists.clear ();
+        System.gc ();
     }
 
     public void onClickAddUrl ()
@@ -109,7 +150,6 @@ public final class MainController implements Initializable
             {
                 Log.N (e);
             }
-
         }
     }
 
@@ -117,5 +157,74 @@ public final class MainController implements Initializable
     public void onClickBtnAddListUrl ()
     {
         ListUrlController.Launch ();
+    }
+
+    @FXML
+    public void onClickBtnResume ()
+    {
+
+    }
+
+    @FXML
+    public void onClickBtnStop ()
+    {
+
+    }
+
+    @FXML
+    public void onClickBtnStopAll ()
+    {
+
+    }
+
+    @FXML
+    public void onClickBtnResumeAll ()
+    {
+
+    }
+
+    @FXML
+    public void onClickBtnClearList ()
+    {
+        new Thread (() ->
+        {
+            final String textBtnClearList = btnClearList.getText ();
+
+            Platform.runLater (() ->
+            {
+                btnClearList.setText ("Please wait...");
+                btnClearList.setDisable (true);
+            });
+
+            final int size = downloadList.getItems ().size ();
+            if (size > 0 && downloadListService.removeAll ())
+            {
+                ShowMessage.Show (Alert.AlertType.INFORMATION , "Clear list" , "The list was cleared" , "Number of deleted: " + size);
+                refresh ();
+            }
+            Platform.runLater (() -> btnClearList.setText (textBtnClearList));
+        }).start ();
+    }
+
+    @FXML
+    public void onClickBtnDeleteCompleted ()
+    {
+        new Thread (() ->
+        {
+            final String textBtnDeleteCompleted = btnDeleteCompleted.getText ();
+            Platform.runLater (() ->
+            {
+                btnDeleteCompleted.setText ("Please wait...");
+                btnDeleteCompleted.setDisable (true);
+            });
+
+            final int numberOfDeleted;
+            if (downloadList.getItems ().size () > 0 && (numberOfDeleted = downloadListService.removeCompleted ()) > 0)
+            {
+                ShowMessage.Show (Alert.AlertType.INFORMATION , "Clear completed" , "Completions were deleted" , "Number of deleted: " + numberOfDeleted);
+                refresh ();
+            }
+            Platform.runLater (() -> btnDeleteCompleted.setText (textBtnDeleteCompleted));
+        }).start ();
     }
 }

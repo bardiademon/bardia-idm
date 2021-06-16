@@ -99,6 +99,8 @@ public final class DownloadPreparation implements Initializable
 
     private DownloadList downloadList;
 
+    private long filesize;
+
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
@@ -148,17 +150,6 @@ public final class DownloadPreparation implements Initializable
         final String url = txtURL.getText ();
         if (notEmpty (url) && notEmpty (txtPath.getText ()) && notEmpty (txtFilename.getText ()))
         {
-            long filesize;
-            try
-            {
-                filesize = (long) Math.abs (Default.ONE_BYTE * Double.parseDouble ((txtFilesize.getText ().split (" ")[1])));
-            }
-            catch (final Exception e)
-            {
-                filesize = 0;
-                Log.N (e);
-            }
-
             if (filesize > 0)
             {
                 if (downloadList == null)
@@ -171,15 +162,18 @@ public final class DownloadPreparation implements Initializable
                     downloadList.setCreatedDir (chkCreateFolder.isSelected ());
                     downloadList.setStartedAt (LocalDateTime.now ());
                     downloadList.setCompleted (completed);
-                    return downloadListService.add (downloadList);
+                    final boolean add = downloadListService.add (downloadList);
+                    if (add) Main.getMainController ().refresh ();
+                    return add;
                 }
                 else
                 {
                     downloadListModify (completed);
-                    return downloadListService.modify (downloadList);
+                    final boolean modify = downloadListService.modify (downloadList);
+                    if (modify) Main.getMainController ().refresh ();
+                    return modify;
                 }
             }
-            Main.getMainController ().refresh ();
         }
 
         showAlert ("Error save" , "Error save to download list" , "Check download info");
@@ -214,18 +208,22 @@ public final class DownloadPreparation implements Initializable
             public boolean OnConnected (final long Size , final File Path)
             {
                 txtConnectionMessage.setText ("Connected");
-                txtFilesize.setText ("Filesize: " + GetSize.Get (Size));
+                filesize = Size;
+                txtFilesize.setText ("Filesize: " + GetSize.Get (filesize));
                 return true;
             }
 
             @Override
             public void OnFilename (final String Filename)
             {
-                txtFilename.clear ();
-                txtFilename.setText (Filename);
+                Platform.runLater (() ->
+                {
+                    txtFilename.clear ();
+                    txtFilename.setText (Filename);
 
-                progress.setVisible (false);
-                txtConnectionMessage.setDisable (false);
+                    progress.setVisible (false);
+                    txtConnectionMessage.setDisable (false);
+                });
 
                 if (txtConnectionMessage.getText ().contains ("Connected") && !txtFilename.getText ().isEmpty ())
                     setGroup ();

@@ -13,6 +13,11 @@ public final class Database
 
     public Database ()
     {
+        connect ();
+    }
+
+    private void connect ()
+    {
         try
         {
             connection = DriverManager.getConnection (URL_CONNECTION);
@@ -20,6 +25,23 @@ public final class Database
         catch (final SQLException e)
         {
             Log.N (e);
+        }
+    }
+
+    public void reconnect ()
+    {
+        if (connected ())
+        {
+            try
+            {
+                connection.close ();
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+            System.gc ();
+            connect ();
         }
     }
 

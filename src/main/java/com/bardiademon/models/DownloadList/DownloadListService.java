@@ -31,6 +31,7 @@ public final class DownloadListService
                     int counter = 0;
                     statement.setString (++counter , downloadList.getLink ());
                     statement.setString (++counter , downloadList.getPath ());
+                    statement.setBoolean (++counter , downloadList.isCompleted ());
                     statement.setBoolean (++counter , downloadList.isCreatedDir ());
 
                     final LocalDateTime startedAt = downloadList.getStartedAt ();
@@ -202,9 +203,9 @@ public final class DownloadListService
     {
         return String.format (
 
-                "insert into \"%s\" (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\") values (?,?,?,?,?)" ,
+                "insert into \"%s\" (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\") values (?,?,?,?,?,?)" ,
                 TABLE_NAME ,
-                ColumnsNames.link.name () , ColumnsNames.path.name () ,
+                ColumnsNames.link.name () , ColumnsNames.path.name () , ColumnsNames.completed.name () ,
                 ColumnsNames.created_dir.name () , ColumnsNames.started_at.name () ,
                 ColumnsNames.size.name ()
         );
@@ -245,6 +246,53 @@ public final class DownloadListService
         else Log.N (new Exception ("downloadList != null && downloadList.getId () > 0"));
 
         return false;
+    }
+
+    public boolean removeAll ()
+    {
+        if (Main.Database ().connected ())
+        {
+            try (PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryRemoveAll ()))
+            {
+                return statement.executeUpdate () > 0;
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+        }
+        else Log.N (new Exception ("Database not connected"));
+
+        return false;
+    }
+
+    public int removeCompleted ()
+    {
+        if (Main.Database ().connected ())
+        {
+            try (PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryRemoveCompleted ()))
+            {
+                statement.setBoolean (1 , true); // Completed
+                return statement.executeUpdate ();
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+        }
+        else Log.N (new Exception ("Database not connected"));
+
+        return 0;
+    }
+
+    private String makeQueryRemoveAll ()
+    {
+        return String.format ("delete from \"%s\" where \"%s\" > 0" , TABLE_NAME , ColumnsNames.id.name ());
+    }
+
+    private String makeQueryRemoveCompleted ()
+    {
+        return String.format ("delete from \"%s\" where \"%s\" = ?" , TABLE_NAME , ColumnsNames.completed.name ());
     }
 
     private String makeQueryModify ()
