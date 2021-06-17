@@ -104,7 +104,8 @@ public final class MainController implements Initializable
             Platform.runLater (() ->
             {
                 btnClearList.setDisable (isNullDownloadedList);
-                btnDeleteCompleted.setDisable (isNullDownloadedList);
+                if (isNullDownloadedList && !btnDeleteCompleted.isDisabled ())
+                    btnDeleteCompleted.setDisable (true);
             });
 
             if (!isNullDownloadedList)

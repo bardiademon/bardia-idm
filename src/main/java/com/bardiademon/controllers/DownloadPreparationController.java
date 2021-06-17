@@ -105,6 +105,11 @@ public final class DownloadPreparationController implements Initializable
 
     private long filesize;
 
+    private boolean isForInfo = false;
+    private int forInfo_index;
+    private ForInfo forInfo;
+    private ListUrlController.LinkInformation forInfo_linkInformation;
+
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
@@ -120,14 +125,28 @@ public final class DownloadPreparationController implements Initializable
 
         if (notEmpty (filename) && notEmpty (saveAs) && notEmpty (url) && txtConnectionMessage.getText ().toLowerCase (Locale.ROOT).contains ("connected"))
         {
-            DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
+            if (isForInfo)
             {
-                if (done)
+                forInfo_linkInformation.setFilename (filename);
+                forInfo_linkInformation.setPath (saveAs);
+                forInfo_linkInformation.setLink (url);
+                forInfo_linkInformation.setToHttps (chkToHttps.isSelected ());
+                forInfo_linkInformation.setCreatedDir (chkCreateFolder.isSelected ());
+                forInfo_linkInformation.setTheNameHasNoSuffix (chkTheNameHasNoSuffix.isSelected ());
+                forInfo.GetDownloadList (forInfo_index , forInfo_linkInformation);
+                btnDownloadCancel ();
+            }
+            else
+            {
+                DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
                 {
-                    saveToDownloadList (true);
-                    btnDownloadCancel ();
-                }
-            });
+                    if (done)
+                    {
+                        saveToDownloadList (true);
+                        btnDownloadCancel ();
+                    }
+                });
+            }
         }
         else showAlert ("Check info" , "Please check info" , "Filename Or Save As Or URL");
     }
@@ -195,10 +214,31 @@ public final class DownloadPreparationController implements Initializable
                 (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage));
     }
 
+    public static void Launch (final String URL , final ListUrlController.LinkInformation _LinkInformation , final int Index , final ForInfo _ForInfo)
+    {
+        Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
+        {
+            controller.load (URL , _LinkInformation , stage);
+            controller.forInfo (Index , _LinkInformation , _ForInfo);
+        });
+    }
+
+    private void forInfo (final int index , final ListUrlController.LinkInformation _LinkInformation , final ForInfo forInfo)
+    {
+        btnDownloadNow.setText ("Apply changes");
+
+        this.isForInfo = true;
+        this.forInfo = forInfo;
+        this.forInfo_index = index;
+        this.forInfo_linkInformation = _LinkInformation;
+
+        btnDownloadLater.setDisable (true);
+    }
+
     public void onClickTxtConnectionMessage ()
     {
         if (url.contains ("http://") && chkToHttps.isSelected ()) setTxtURL (url);
-        
+
         txtConnectionMessage.setText ("Connecting...");
         progress.setVisible (true);
         txtConnectionMessage.setDisable (true);
@@ -409,6 +449,11 @@ public final class DownloadPreparationController implements Initializable
     private void showAlert (final String title , final String headerText , final String content)
     {
         ShowMessage.Show (Alert.AlertType.ERROR , title , headerText , content);
+    }
+
+    public interface ForInfo
+    {
+        void GetDownloadList (final int Index , final ListUrlController.LinkInformation _LinkInformation);
     }
 
     @FXML

@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Download">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/data/Download.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="file://$PROJECT_DIR$/../1/Old/IntelliJ/Download/src" />
+    </SOURCES>
+  </library>
+</component>

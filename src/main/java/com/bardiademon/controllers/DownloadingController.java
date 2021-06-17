@@ -6,6 +6,7 @@ import com.bardiademon.Main;
 import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.ShowMessage;
+import com.bardiademon.models.DownloadList.DownloadList;
 import javafx.application.Platform;
 
 import javafx.fxml.FXML;
@@ -17,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +59,8 @@ public class DownloadingController implements On
 
     private boolean pause;
 
+    private boolean runDownloadResult = false;
+
     // for method close ,
     // downloadResult.Result (done);
     //        Platform.runLater (() ->
@@ -67,6 +71,8 @@ public class DownloadingController implements On
     private boolean done;
 
     private Download.ResumeDownload resumeDownload;
+
+    private boolean invokeClose = false;
 
     private static final String BTN_PAUSE_TX__PAUSE = "Pause", BTN_PAUSE_TX__RESUME = "Resume";
 
@@ -88,9 +94,14 @@ public class DownloadingController implements On
         close (false);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
+    public static DownloadingController Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult)
     {
-        Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
+        return Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult);
+    }
+
+    public static DownloadingController Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
+    {
+        return Main.Launch ("Downloading" , Filename , (controller , stage) ->
         {
             controller.url = URL;
             controller.filename = Filename;
@@ -132,8 +143,9 @@ public class DownloadingController implements On
         });
     }
 
-    private void close (final boolean done)
+    public void close (final boolean done)
     {
+        invokeClose = true;
         this.done = done;
         download.compulsoryStop ();
     }
@@ -210,8 +222,12 @@ public class DownloadingController implements On
     @Override
     public void OnErrorDownloading (final Exception E)
     {
-        alert ("Downloading error" , "Error: " + E.getMessage ());
-        close (false);
+        if (!invokeClose)
+        {
+            alert ("Downloading error" , "Error: " + E.getMessage ());
+            close (false);
+        }
+        else Log.N (E);
     }
 
     @Override
@@ -260,7 +276,7 @@ public class DownloadingController implements On
     @Override
     public void OnCompulsoryStop ()
     {
-        downloadResult.Result (done);
+        runDownloadResult ();
         Platform.runLater (() ->
         {
             stage.close ();
@@ -279,6 +295,15 @@ public class DownloadingController implements On
     public void OnError (final Exception E)
     {
 
+    }
+
+    private void runDownloadResult ()
+    {
+        if (!runDownloadResult && downloadResult != null)
+        {
+            runDownloadResult = true;
+            downloadResult.Result (done);
+        }
     }
 
     public interface DownloadResult

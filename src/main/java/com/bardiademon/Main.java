@@ -19,6 +19,8 @@ public final class Main extends Application
 
     public static MainController mainController;
 
+    public static final Object Wait = new Object ();
+
     @Override
     public void start (final Stage primaryStage)
     {
@@ -39,33 +41,42 @@ public final class Main extends Application
         return mainController;
     }
 
-    public static <T> void Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
+    public static <T> T Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
     {
         final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
+
+        final var objController = new Object ()
+        {
+            T controller = null;
+        };
+
         if (resource != null)
         {
-            Platform.runLater (() ->
+            final FXMLLoader fxmlLoader = new FXMLLoader (resource);
+            final Stage stage = new Stage ();
+            stage.setResizable (false);
+
+            stage.setTitle (Title);
+            try
             {
-                final FXMLLoader fxmlLoader = new FXMLLoader (resource);
-                final Stage stage = new Stage ();
-                stage.setResizable (false);
-
-
-                stage.setTitle (Title);
-                try
+                stage.setScene (new Scene (fxmlLoader.load ()));
+                if (_Controller != null)
                 {
-                    stage.setScene (new Scene (fxmlLoader.load ()));
-                    if (_Controller != null) _Controller.GetController (fxmlLoader.getController () , stage);
-                    stage.show ();
+                    objController.controller = fxmlLoader.getController ();
+                    _Controller.GetController (objController.controller , stage);
                 }
-                catch (final IOException e)
-                {
-                    e.printStackTrace ();
-                    Log.N (e);
-                }
-            });
+                stage.show ();
+            }
+            catch (final IOException e)
+            {
+                e.printStackTrace ();
+                Log.N (e);
+            }
         }
         else Log.N (new Exception ("Resource is null."));
+
+
+        return objController.controller;
     }
 
     public interface Controller<T>

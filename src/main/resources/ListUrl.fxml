@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import com.jfoenix.controls.JFXListView?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="494.0" prefWidth="925.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.ListUrlController">
-    <JFXListView fx:id="list" layoutX="24.0" layoutY="47.0" prefHeight="373.0" prefWidth="883.0" />
+<AnchorPane prefHeight="544.0" prefWidth="925.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.ListUrlController">
     <Button layoutX="24.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnAdd" prefHeight="25.0" prefWidth="114.0" text="Add" />
     <Button layoutX="145.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnAddWithFile" prefHeight="25.0" prefWidth="114.0" text="Add with file" />
     <Button fx:id="btnRemoveSelected" layoutX="24.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnRemoveSelected" prefHeight="25.0" prefWidth="114.0" text="Remove selected" />
-    <Button layoutX="774.0" layoutY="452.0" mnemonicParsing="false" onAction="#onClickBtnCancel" prefHeight="25.0" prefWidth="133.0" text="Cancel and close" />
-    <Button layoutX="351.0" layoutY="440.0" mnemonicParsing="false" onAction="#onClickBtnDownloadNow" prefHeight="25.0" prefWidth="104.0" text="Download now" />
-    <Button layoutX="477.0" layoutY="440.0" mnemonicParsing="false" onAction="#onClickBtnDownloadLater" prefHeight="25.0" prefWidth="104.0" text="Download later" />
-   <Button layoutX="145.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnRemoveAll" prefHeight="25.0" prefWidth="114.0" text="Clear list" />
+    <Button layoutX="769.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnCancel" prefHeight="25.0" prefWidth="133.0" text="Cancel and close" />
+    <Button fx:id="btnDownloadNow" layoutX="24.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnDownloadNow" prefHeight="25.0" prefWidth="104.0" text="Download now" />
+    <Button layoutX="657.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnDownloadLater" prefHeight="25.0" prefWidth="104.0" text="Download later" />
+    <Button layoutX="297.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnRemoveAll" prefHeight="25.0" prefWidth="114.0" text="Clear list" />
+    <TableView fx:id="list" layoutX="24.0" layoutY="47.0" onMouseClicked="#onCLickList" prefHeight="369.0" prefWidth="878.0" />
+   <TextField fx:id="txtPath" editable="false" layoutX="24.0" layoutY="466.0" prefHeight="25.0" prefWidth="878.0" promptText="Path" />
+   <Button layoutX="798.0" layoutY="433.0" mnemonicParsing="false" onAction="#onClickBtnChoosePath" prefHeight="25.0" prefWidth="104.0" text="Choose path" />
+   <Button layoutX="145.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnDeleteTheUnconnected" prefHeight="25.0" prefWidth="143.0" text="Delete the unconnected" />
 </AnchorPane>
