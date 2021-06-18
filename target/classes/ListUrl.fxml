@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXComboBox?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -10,11 +11,16 @@
     <Button layoutX="145.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnAddWithFile" prefHeight="25.0" prefWidth="114.0" text="Add with file" />
     <Button fx:id="btnRemoveSelected" layoutX="24.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnRemoveSelected" prefHeight="25.0" prefWidth="114.0" text="Remove selected" />
     <Button layoutX="769.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnCancel" prefHeight="25.0" prefWidth="133.0" text="Cancel and close" />
-    <Button fx:id="btnDownloadNow" layoutX="24.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnDownloadNow" prefHeight="25.0" prefWidth="104.0" text="Download now" />
+    <Button fx:id="btnDownloadNow" layoutX="544.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnDownloadNow" prefHeight="25.0" prefWidth="104.0" text="Download now" />
     <Button layoutX="657.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnDownloadLater" prefHeight="25.0" prefWidth="104.0" text="Download later" />
     <Button layoutX="297.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnRemoveAll" prefHeight="25.0" prefWidth="114.0" text="Clear list" />
     <TableView fx:id="list" layoutX="24.0" layoutY="47.0" onMouseClicked="#onCLickList" prefHeight="369.0" prefWidth="878.0" />
-   <TextField fx:id="txtPath" editable="false" layoutX="24.0" layoutY="466.0" prefHeight="25.0" prefWidth="878.0" promptText="Path" />
-   <Button layoutX="798.0" layoutY="433.0" mnemonicParsing="false" onAction="#onClickBtnChoosePath" prefHeight="25.0" prefWidth="104.0" text="Choose path" />
-   <Button layoutX="145.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnDeleteTheUnconnected" prefHeight="25.0" prefWidth="143.0" text="Delete the unconnected" />
+    <TextField fx:id="txtPath" editable="false" layoutX="24.0" layoutY="466.0" prefHeight="25.0" prefWidth="878.0" promptText="Path" />
+    <Button layoutX="798.0" layoutY="433.0" mnemonicParsing="false" onAction="#onClickBtnChoosePath" prefHeight="25.0" prefWidth="104.0" text="Choose path" />
+    <Button layoutX="145.0" layoutY="427.0" mnemonicParsing="false" onAction="#onClickBtnDeleteTheUnconnected" prefHeight="25.0" prefWidth="143.0" text="Delete the unconnected" />
+    <TextField fx:id="txtListname" layoutX="24.0" layoutY="505.0" prefHeight="25.0" prefWidth="175.0" promptText="List name" />
+    <Button fx:id="btnSaveList" disable="true" layoutX="202.0" layoutY="505.0" mnemonicParsing="false" onAction="#onClickBtnSaveList" text="Save list" />
+    <JFXComboBox fx:id="listsName" layoutX="570.0" layoutY="14.0" onAction="#onClickListname" prefHeight="25.0" prefWidth="175.0" />
+   <Button fx:id="btnGetList" disable="true" layoutX="757.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnGetList" prefHeight="25.0" prefWidth="68.0" text="Get" />
+   <Button fx:id="btnRemoveList" disable="true" layoutX="833.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnRemoveList" prefHeight="25.0" prefWidth="68.0" text="Remove" />
 </AnchorPane>

@@ -7,6 +7,10 @@ import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
+import com.bardiademon.models.Lists.Lists;
+import com.bardiademon.models.Lists.ListsService;
+import com.bardiademon.models.Lists.NameId;
+import com.jfoenix.controls.JFXComboBox;
 import com.linkedin.urls.Url;
 import com.linkedin.urls.detection.UrlDetector;
 import com.linkedin.urls.detection.UrlDetectorOptions;
@@ -49,6 +53,21 @@ public final class ListUrlController implements Initializable
     @FXML
     public Button btnDownloadNow;
 
+    @FXML
+    public TextField txtListname;
+
+    @FXML
+    public Button btnSaveList;
+
+    @FXML
+    public JFXComboBox <NameId> listsName;
+
+    @FXML
+    public Button btnRemoveList;
+
+    @FXML
+    public Button btnGetList;
+
     private Stage stage;
 
     private DownloadListService downloadListService;
@@ -59,10 +78,19 @@ public final class ListUrlController implements Initializable
 
     private ManagementDownloading managementDownloading;
 
+    private ListsService listsService;
+
+    private List <NameId> nameIds;
+
+    private Lists lists;
+
+    private int selectedItemNameId = -1;
+
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
         downloadListService = new DownloadListService ();
+        listsService = new ListsService ();
 
         final TableColumn <LinkInformation, String> filename = new TableColumn <> ("Filename");
         filename.setCellValueFactory (new PropertyValueFactory <> ("filename"));
@@ -75,6 +103,11 @@ public final class ListUrlController implements Initializable
 
         Platform.runLater (() -> list.getColumns ().addAll (Arrays.asList (filename , size , status)));
         linkInformation = new ArrayList <> ();
+
+        refreshNameIds ();
+
+        txtPath.textProperty ().addListener ((observable , oldValue , newValue) -> btnSaveListSetDisable ());
+        txtListname.textProperty ().addListener ((observable , oldValue , newValue) -> btnSaveListSetDisable ());
     }
 
     private void refresh ()
@@ -84,6 +117,21 @@ public final class ListUrlController implements Initializable
             list.getItems ().clear ();
             list.getItems ().addAll (linkInformation);
         });
+    }
+
+    private void refreshNameIds ()
+    {
+        nameIds = listsService.getNameIds ();
+        if (nameIds != null && nameIds.size () > 0)
+        {
+            Platform.runLater (() ->
+            {
+                listsName.getItems ().clear ();
+                listsName.getItems ().addAll (nameIds);
+
+                if (selectedItemNameId >= 0) listsName.getSelectionModel ().select (selectedItemNameId);
+            });
+        }
     }
 
     @FXML
@@ -219,13 +267,11 @@ public final class ListUrlController implements Initializable
                 }
                 onClickBtnDeleteTheUnconnected ();
 
-                for (final LinkInformation information : linkInformation)
+                managementDownloading = new ManagementDownloading (new ArrayList <> (linkInformation) , () ->
                 {
-                    if (information.getPath () == null || information.getPath ().isEmpty ())
-                        information.setPath (String.format ("%s%s%s" , path , File.separator , information.getFilename ()));
-                }
-
-                managementDownloading = new ManagementDownloading (new ArrayList <> (linkInformation));
+                    Main.getMainController ().refresh ();
+                    btnDownloadNow.setDisable (false);
+                });
 
                 btnDownloadNow.setDisable (true);
             }
@@ -243,9 +289,9 @@ public final class ListUrlController implements Initializable
                 final ObservableList <LinkInformation> items = list.getItems ();
                 for (final LinkInformation item : items)
                 {
-                    final DownloadList downloadList = new DownloadList ();
-                    downloadList.setLink (item.getLink ());
-                    downloadListService.add (downloadList);
+                    item.setLink (item.getLink ());
+                    if (item.getId () > 0) downloadListService.modify (item);
+                    else downloadListService.add (item);
                 }
                 Main.getMainController ().refresh ();
             }).start ();
@@ -267,30 +313,39 @@ public final class ListUrlController implements Initializable
 
     private void addToList (final String... links)
     {
+        addToList (true , links);
+    }
+
+    private void addToList (final boolean save , final String... links)
+    {
         new Thread (() ->
         {
-            final int start = (linkInformation.size () == 0 ? 0 : linkInformation.size () - 1);
+            final int start = (linkInformation.size () == 0 || !save ? 0 : linkInformation.size () - 1);
 
-            for (final String link : links)
+            if (save)
             {
-                if (!hasLink (link))
+                for (final String link : links)
                 {
-                    final LinkInformation linkInformation = new LinkInformation (link);
-                    linkInformation.setFilename (link);
-                    linkInformation.setStatus ("Please wait...");
-                    ListUrlController.this.linkInformation.add (linkInformation);
-                    list.getItems ().add (linkInformation);
+                    if (!hasLink (link))
+                    {
+                        final LinkInformation linkInformation = new LinkInformation (link);
+                        linkInformation.setFilename (link);
+                        linkInformation.setStatus ("Please wait...");
+                        ListUrlController.this.linkInformation.add (linkInformation);
+                        list.getItems ().add (linkInformation);
+                    }
                 }
             }
+            else refresh ();
 
             System.gc ();
 
-            if (start + 1 >= linkInformation.size ()) return;
+            if (save && start + 1 >= linkInformation.size ()) return;
 
             final Download download = new Download ();
             try
             {
-                for (int i = start, len = links.length; i < len; i++) connect (i , download , links[i]);
+                for (int i = start, len = links.length; i < len; i++) connect (save , i , download , links[i]);
             }
             catch (final Exception e)
             {
@@ -326,9 +381,25 @@ public final class ListUrlController implements Initializable
 
         final File file = directoryChooser.showDialog (null);
 
-        if (file != null) txtPath.setText (file.getAbsolutePath ());
+        if (file != null) setTxtPath (file.getAbsolutePath ());
 
         System.gc ();
+    }
+
+    private void setTxtPath (final String path)
+    {
+        final String oldPath = txtPath.getText ();
+
+        Platform.runLater (() -> txtPath.setText (path));
+        for (int i = 0, len = linkInformation.size (); i < len; i++)
+        {
+            final LinkInformation linkInformation = this.linkInformation.get (i);
+            if (linkInformation.getPath () == null || linkInformation.getPath ().contains (oldPath))
+            {
+                linkInformation.setPath (String.format ("%s%s%s" , path , File.separator , linkInformation.getFilename ()));
+                this.linkInformation.set (i , linkInformation);
+            }
+        }
     }
 
     @FXML
@@ -391,7 +462,7 @@ public final class ListUrlController implements Initializable
                     {
                         this.linkInformation.set (index , information);
                         new Thread (ListUrlController.this::refresh).start ();
-                        new Thread (() -> connect (index , new Download () , information.getLink ()));
+                        new Thread (() -> connect (false , index , new Download () , information.getLink ()));
                     });
                 }
             }
@@ -402,9 +473,9 @@ public final class ListUrlController implements Initializable
         }
     }
 
-    private void connect (final int index , final Download download , final String link)
+    private void connect (final boolean save , final int index , final Download download , final String link)
     {
-        linkInformation.get (index).setStatus ("Downloading...");
+        linkInformation.get (index).setStatus ("Connecting...");
         Platform.runLater (() -> list.getItems ().set (index , linkInformation.get (index)));
         new Thread (ListUrlController.this::refresh).start ();
         download.newDownload (link , new OnInfoLink ()
@@ -490,7 +561,172 @@ public final class ListUrlController implements Initializable
             }
         }
         new Thread (this::refresh).start ();
+
+        if (save)
+        {
+            final LinkInformation linkInformation = this.linkInformation.get (index);
+            if (linkInformation.getStatus ().toLowerCase (Locale.ROOT).contains ("connected"))
+            {
+                linkInformation.setId (downloadListService.addGetId (linkInformation));
+                this.linkInformation.set (index , linkInformation);
+            }
+        }
+
+        Main.getMainController ().refresh ();
+
         System.gc ();
+    }
+
+    @FXML
+    public void onClickBtnSaveList ()
+    {
+        final String listname = txtListname.getText ();
+        if (listname != null && !listname.isEmpty ())
+        {
+            if (linkInformation.size () > 0)
+            {
+                if ((lists != null && lists.getName ().equals (listname)) || !listsService.hasName (listname))
+                {
+                    if (lists == null)
+                    {
+                        lists = new Lists ();
+                        lists.setPath (txtPath.getText ());
+                        lists.setName (listname);
+
+                        final long id = listsService.addGetId (lists);
+                        lists.setId (id);
+
+                        if (id > 0)
+                        {
+                            new Thread (() ->
+                            {
+                                for (int i = 0, len = ListUrlController.this.linkInformation.size (); i < len; i++)
+                                {
+                                    final LinkInformation linkInformation = ListUrlController.this.linkInformation.get (i);
+                                    linkInformation.setListId (id);
+                                    ListUrlController.this.linkInformation.set (i , linkInformation);
+                                    ListUrlController.this.downloadListService.modify (linkInformation);
+                                }
+                            }).start ();
+                            refreshNameIds ();
+                            ShowMessage.Show (Alert.AlertType.INFORMATION , "Added" , "List added" , "List name: " + listname);
+                        }
+                    }
+                    else
+                    {
+                        lists.setPath (txtPath.getText ());
+                        lists.setName (listname);
+
+                        if (listsService.modify (lists))
+                        {
+                            refreshNameIds ();
+                            ShowMessage.Show (Alert.AlertType.INFORMATION , "Modify" , "The list changed" , "List name: " + listname);
+                        }
+                    }
+                }
+                else
+                    ShowMessage.Show (Alert.AlertType.ERROR , "Listname error" , "The name of the list is duplicate" , "Please enter another name");
+            }
+            else
+                ShowMessage.Show (Alert.AlertType.ERROR , "is empty" , "List is a empty" , "Please add list");
+        }
+        else ShowMessage.Show (Alert.AlertType.ERROR , "is empty" , "List name is empty" , "Please enter list name");
+    }
+
+    private void btnSaveListSetDisable ()
+    {
+        btnSaveList.setDisable (isEmpty (this.txtListname.getText ()) || isEmpty (this.txtPath.getText ()));
+    }
+
+    private boolean isEmpty (final String val)
+    {
+        return (val == null || val.isEmpty ());
+    }
+
+    @FXML
+    public void onClickBtnGetList ()
+    {
+        if (nameIds != null && nameIds.size () > 0)
+        {
+            selectedItemNameId = listsName.getSelectionModel ().getSelectedIndex ();
+
+            if (selectedItemNameId >= 0)
+            {
+                final NameId nameId = nameIds.get (selectedItemNameId);
+
+                final Lists lists = listsService.getLists (nameId.getId ());
+
+                if (lists != null)
+                {
+                    this.lists = lists;
+
+                    Platform.runLater (list.getItems ()::clear);
+
+                    linkInformation.clear ();
+                    System.gc ();
+
+                    setTxtPath (lists.getPath ());
+                    txtListname.setText (lists.getName ());
+
+                    final List <DownloadList> downloadLists = lists.getDownloadLists ();
+
+                    if (downloadLists != null && downloadLists.size () > 0)
+                    {
+                        final String[] urls = new String[downloadLists.size ()];
+                        for (int i = 0, downloadListsSize = downloadLists.size (); i < downloadListsSize; i++)
+                        {
+                            final DownloadList downloadList = downloadLists.get (i);
+                            urls[i] = downloadList.getLink ();
+                            linkInformation.add (new LinkInformation (downloadList));
+                        }
+
+
+                        addToList (false , urls);
+                    }
+
+                }
+            }
+        }
+    }
+
+    @FXML
+    public void onClickBtnRemoveList ()
+    {
+        selectedItemNameId = listsName.getSelectionModel ().getSelectedIndex ();
+        if (selectedItemNameId >= 0 && lists != null && lists.getName ().equals (listsName.getItems ().get (selectedItemNameId).getName ()))
+        {
+            final String listname = lists.getName ();
+
+            if (listsService.remove (lists.getId ()) && downloadListService.removeList (lists.getId ()))
+            {
+                linkInformation.clear ();
+                listsName.getItems ().remove (selectedItemNameId);
+                selectedItemNameId = -1;
+                lists = null;
+                list.getItems ().clear ();
+                setTxtPath ("");
+                txtListname.setText ("");
+
+                Main.getMainController ().refresh ();
+
+                System.gc ();
+
+                ShowMessage.Show (Alert.AlertType.INFORMATION , "Removed" , "The list has been deleted" , '"' + listname + "\" was removed");
+            }
+            else
+                ShowMessage.Show (Alert.AlertType.ERROR , "Error" , "Error deleting list" , "List name: \"" + listname + '"');
+
+        }
+    }
+
+    @FXML
+    public void onClickListname ()
+    {
+        selectedItemNameId = listsName.getSelectionModel ().getSelectedIndex ();
+
+        final boolean disable = nameIds == null || nameIds.size () == 0 || selectedItemNameId < 0;
+        btnRemoveList.setDisable (disable);
+        btnGetList.setDisable (disable);
     }
 
     public final static class LinkInformation extends DownloadList
@@ -502,6 +738,25 @@ public final class ListUrlController implements Initializable
         public LinkInformation (final String link)
         {
             this.link = link;
+        }
+
+        public LinkInformation (final DownloadList downloadList)
+        {
+            this.link = downloadList.getLink ();
+            setId (downloadList.getId ());
+            setFilename (FilenameUtils.getBaseName (downloadList.getPath ()));
+            setPath (downloadList.getPath ());
+            setCreatedDir (downloadList.isCreatedDir ());
+            setTheNameHasNoSuffix (downloadList.isTheNameHasNoSuffix ());
+            setSize (downloadList.getByteSize ());
+            setStatus ("Please wait...");
+            setToHttps (downloadList.isToHttps ());
+            setCompleted (downloadList.isCompleted ());
+            setDescription (downloadList.getDescription ());
+            setListId (downloadList.getListId ());
+            setEndAt (downloadList.getEndAt ());
+            setTime (downloadList.getTime ());
+            setStartedAt (downloadList.getStartedAt ());
         }
 
         public String getLink ()

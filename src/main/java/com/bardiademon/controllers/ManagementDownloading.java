@@ -1,14 +1,18 @@
 package com.bardiademon.controllers;
 
-
+import com.bardiademon.Main;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.bardiademon.NT;
 import com.bardiademon.models.DownloadList.DownloadList;
+import com.bardiademon.models.DownloadList.DownloadListService;
+import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class ManagementDownloading
 {
     private final List <DownloadList> downloadLists;
+    private final Result result;
 
     private int index = 0;
 
@@ -18,10 +22,14 @@ public final class ManagementDownloading
 
     private final List <DownloadingController> downloadingController;
 
-    public ManagementDownloading (final List <DownloadList> downloadLists)
+    private final DownloadListService downloadListService;
+
+    public ManagementDownloading (final List <DownloadList> _DownloadLists , final Result _Result)
     {
-        this.downloadLists = downloadLists;
-        downloadingController = new ArrayList <> ();
+        this.downloadLists = _DownloadLists;
+        this.result = _Result;
+        this.downloadingController = new ArrayList <> ();
+        this.downloadListService = new DownloadListService ();
         start (getMultipleDownloads ());
     }
 
@@ -57,19 +65,40 @@ public final class ManagementDownloading
 
     private void launch (final DownloadList downloadList)
     {
-        if (stop) return;
+        if (stop)
+        {
+            result.OnCompleted ();
+            System.gc ();
+            return;
+        }
 
         downloadingController.add (DownloadingController.Launch (downloadList , done ->
         {
             try
             {
+                downloadList.setCompleted (done);
+                downloadListService.modify (downloadList);
+
+                NT.N (Main.getMainController ()::refresh);
+
+                Platform.runLater (() -> AfterDownloadController.Launch (downloadList.getLink () , downloadList.getPath () , downloadList.getSize () , downloadList.getByteSize ()));
+
                 launch (downloadLists.get (index++));
+
+                System.gc ();
             }
             catch (final Exception e)
             {
                 Log.N (e);
+                result.OnCompleted ();
+                System.gc ();
             }
         }));
+    }
+
+    public interface Result
+    {
+        void OnCompleted ();
     }
 
 }

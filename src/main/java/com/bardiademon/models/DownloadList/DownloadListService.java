@@ -17,16 +17,16 @@ public final class DownloadListService
 
     public enum ColumnsNames
     {
-        id, started_at, end_at, completed, path, created_dir, size, time, link
+        id, started_at, end_at, completed, path, created_dir, size, time, link, lists_id
     }
 
-    public boolean add (final DownloadList downloadList)
+    public long addGetId (final DownloadList downloadList)
     {
         if (Main.Database ().connected ())
         {
             if (downloadList.getLink () != null)
             {
-                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryAdd ()))
+                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryAdd () , Statement.RETURN_GENERATED_KEYS))
                 {
                     int counter = 0;
                     statement.setString (++counter , downloadList.getLink ());
@@ -39,9 +39,72 @@ public final class DownloadListService
 
                     statement.setLong (++counter , downloadList.getByteSize ());
 
+                    statement.setLong (++counter , downloadList.getListId ());
+
+
                     Log.N ("Added");
 
-                    return (statement.executeUpdate () > 0);
+                    final boolean added = statement.executeUpdate () > 0;
+                    if (added)
+                    {
+                        try (ResultSet generatedKeys = statement.getGeneratedKeys ())
+                        {
+                            return generatedKeys.getLong (1);
+                        }
+                        catch (final SQLException e)
+                        {
+                            Log.N (e);
+                        }
+                    }
+                }
+                catch (final SQLException e)
+                {
+                    Log.N (e);
+                }
+            }
+            else Log.N (new Exception ("check (link,startedAt,size)"));
+        }
+        else Log.N (new Exception ("Database not connected"));
+
+        return 0;
+    }
+
+    public boolean add (final DownloadList downloadList)
+    {
+        if (Main.Database ().connected ())
+        {
+            if (downloadList.getLink () != null)
+            {
+                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryAdd () , Statement.RETURN_GENERATED_KEYS))
+                {
+                    int counter = 0;
+                    statement.setString (++counter , downloadList.getLink ());
+                    statement.setString (++counter , downloadList.getPath ());
+                    statement.setBoolean (++counter , downloadList.isCompleted ());
+                    statement.setBoolean (++counter , downloadList.isCreatedDir ());
+
+                    final LocalDateTime startedAt = downloadList.getStartedAt ();
+                    statement.setTimestamp (++counter , (startedAt == null ? null : Timestamp.valueOf (startedAt)));
+
+                    statement.setLong (++counter , downloadList.getByteSize ());
+
+                    statement.setLong (++counter , downloadList.getListId ());
+
+                    Log.N ("Added");
+
+                    final boolean added = statement.executeUpdate () > 0;
+                    if (added)
+                    {
+                        try (ResultSet generatedKeys = statement.getGeneratedKeys ();)
+                        {
+                            generatedKeys.getLong (1);
+                        }
+                        catch (final SQLException e)
+                        {
+                            Log.N (e);
+                        }
+                    }
+
                 }
                 catch (final SQLException e)
                 {
@@ -82,6 +145,39 @@ public final class DownloadListService
         return null;
     }
 
+    public List <DownloadList> findByListId (final long listId)
+    {
+        if (Main.Database ().connected ())
+        {
+            if (getCount () > 0)
+            {
+                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryFindByListId () , ResultSet.TYPE_FORWARD_ONLY , ResultSet.CONCUR_READ_ONLY))
+                {
+                    statement.setLong (1 , listId);
+                    try (final ResultSet resultSet = statement.executeQuery ())
+                    {
+                        final List <DownloadList> downloadLists = new ArrayList <> ();
+                        while (resultSet.next ()) downloadLists.add (getDownloadList (resultSet));
+
+                        if (downloadLists.size () > 0)
+                        {
+                            Log.N ("Get List<DownloadList> => size: " + downloadLists.size () + " toString(" + downloadLists + ")");
+                            return downloadLists;
+                        }
+                    }
+                }
+                catch (final SQLException e)
+                {
+                    Log.N (e);
+                }
+            }
+            else Log.N ("Is empty download list");
+        }
+        else Log.N (new Exception ("Database not connected"));
+
+        return null;
+    }
+
     private DownloadList getDownloadList (final ResultSet resultSet) throws SQLException
     {
         final DownloadList downloadList = new DownloadList ();
@@ -104,6 +200,8 @@ public final class DownloadListService
         downloadList.setEndAt (((endAt == null) ? null : endAt.toLocalDateTime ()));
 
         downloadList.setSize (resultSet.getLong (ColumnsNames.size.name ()));
+
+        downloadList.setListId (resultSet.getLong (ColumnsNames.lists_id.name ()));
 
         return downloadList;
     }
@@ -164,7 +262,7 @@ public final class DownloadListService
         return 0;
     }
 
-    public int getCountFindById (final long id)
+    private int getCountFindById (final long id)
     {
         if (Main.Database ().connected ())
         {
@@ -203,11 +301,11 @@ public final class DownloadListService
     {
         return String.format (
 
-                "insert into \"%s\" (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\") values (?,?,?,?,?,?)" ,
+                "insert into \"%s\" (\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\",\"%s\") values (?,?,?,?,?,?,?)" ,
                 TABLE_NAME ,
                 ColumnsNames.link.name () , ColumnsNames.path.name () , ColumnsNames.completed.name () ,
                 ColumnsNames.created_dir.name () , ColumnsNames.started_at.name () ,
-                ColumnsNames.size.name ()
+                ColumnsNames.size.name () , ColumnsNames.lists_id.name ()
         );
     }
 
@@ -231,6 +329,9 @@ public final class DownloadListService
 
                     final LocalDateTime time = downloadList.getTime ();
                     statement.setTimestamp (++counter , (time != null ? Timestamp.valueOf (time) : null));
+
+                    statement.setLong (++counter , downloadList.getListId ());
+
                     // where
                     statement.setLong (++counter , downloadList.getId ());
 
@@ -241,12 +342,13 @@ public final class DownloadListService
                     Log.N (e);
                 }
             }
-            else Log.N (new Exception ("Database not connected"));
+            else Log.N (new Exception (Log.DATABASE_NOT_CONNECTED));
         }
         else Log.N (new Exception ("downloadList != null && downloadList.getId () > 0"));
 
         return false;
     }
+
 
     public boolean removeAll ()
     {
@@ -254,6 +356,25 @@ public final class DownloadListService
         {
             try (PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryRemoveAll ()))
             {
+                return statement.executeUpdate () > 0;
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+        }
+        else Log.N (new Exception ("Database not connected"));
+
+        return false;
+    }
+
+    public boolean removeList (final long listId)
+    {
+        if (Main.Database ().connected ())
+        {
+            try (PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryRemoveList ()))
+            {
+                statement.setLong (1 , listId);
                 return statement.executeUpdate () > 0;
             }
             catch (final SQLException e)
@@ -290,6 +411,11 @@ public final class DownloadListService
         return String.format ("delete from \"%s\" where \"%s\" > 0" , TABLE_NAME , ColumnsNames.id.name ());
     }
 
+    private String makeQueryRemoveList ()
+    {
+        return String.format ("delete from \"%s\" where \"%s\" = ?" , TABLE_NAME , ColumnsNames.lists_id.name ());
+    }
+
     private String makeQueryRemoveCompleted ()
     {
         return String.format ("delete from \"%s\" where \"%s\" = ?" , TABLE_NAME , ColumnsNames.completed.name ());
@@ -297,15 +423,22 @@ public final class DownloadListService
 
     private String makeQueryModify ()
     {
-        return String.format ("update \"%s\" set \"%s\"=? ,\"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? where \"%s\"=?" ,
+        return String.format ("update \"%s\" set \"%s\"=? ,\"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\"=? , \"%s\" = ? where \"%s\"=?" ,
                 TABLE_NAME ,
                 ColumnsNames.link , ColumnsNames.path , ColumnsNames.end_at , ColumnsNames.completed , ColumnsNames.created_dir , ColumnsNames.time ,
+                ColumnsNames.lists_id.name () ,
+                // where
                 ColumnsNames.id);
     }
 
     public String makeQueryFindAll ()
     {
         return String.format ("select * from \"%s\"" , TABLE_NAME);
+    }
+
+    public String makeQueryFindByListId ()
+    {
+        return String.format ("select * from \"%s\" where \"%s\" = ?" , TABLE_NAME , ColumnsNames.lists_id.name ());
     }
 
     public String makeQueryFindById ()

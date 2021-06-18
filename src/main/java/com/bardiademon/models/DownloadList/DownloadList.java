@@ -16,6 +16,8 @@ public class DownloadList
 
     private boolean toHttps, theNameHasNoSuffix;
 
+    private long listId;
+
     public DownloadList ()
     {
     }
@@ -143,6 +145,16 @@ public class DownloadList
     public void setTheNameHasNoSuffix (boolean theNameHasNoSuffix)
     {
         this.theNameHasNoSuffix = theNameHasNoSuffix;
+    }
+
+    public long getListId ()
+    {
+        return listId;
+    }
+
+    public void setListId (long listId)
+    {
+        this.listId = listId;
     }
 
     @Override
