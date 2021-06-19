@@ -61,6 +61,8 @@ public class DownloadingController implements On
 
     private boolean runDownloadResult = false;
 
+    private boolean fast;
+
     // for method close ,
     // downloadResult.Result (done);
     //        Platform.runLater (() ->
@@ -101,6 +103,11 @@ public class DownloadingController implements On
 
     public static DownloadingController Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
     {
+        return Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false);
+    }
+
+    public static DownloadingController Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast)
+    {
         return Main.Launch ("Downloading" , Filename , (controller , stage) ->
         {
             controller.url = URL;
@@ -111,6 +118,7 @@ public class DownloadingController implements On
             controller.stage = stage;
             controller.downloadResult = _DownloadResult;
             controller.toHttps = ToHttps;
+            controller.fast = Fast;
             controller.run ();
 
             controller.stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> new Thread (() ->
@@ -165,6 +173,12 @@ public class DownloadingController implements On
     @Override
     public int OnExistsFile (final boolean FullNotDownloaded)
     {
+        if (fast)
+        {
+            if (FullNotDownloaded) return Download.FIEC_RESUME;
+            else return Download.FIEC_DELETE;
+        }
+
         final AtomicInteger result = new AtomicInteger (Download.FIEC_CANCEL);
         new Thread (() -> Platform.runLater (() -> DownloadFileIsExistsController.Launch ((command , Filename) ->
         {

@@ -1,12 +1,10 @@
 package com.bardiademon.controllers;
 
 import com.bardiademon.Main;
-import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -33,12 +31,6 @@ public final class MainController implements Initializable
     public Button btnResume;
 
     @FXML
-    public Button btnStop;
-
-    @FXML
-    public Button btnStopAll;
-
-    @FXML
     public Button btnResumeAll;
 
     @FXML
@@ -49,6 +41,9 @@ public final class MainController implements Initializable
 
     @FXML
     public Button btnDownload;
+
+    @FXML
+    public Button btnRedownload;
 
 
     private List <DownloadList> downloadLists;
@@ -116,13 +111,20 @@ public final class MainController implements Initializable
             if (!isNullDownloadedList)
             {
                 boolean btnDeleteCompletedDisableFalse = false;
+
+                btnResumeAll.setDisable (true);
                 for (final DownloadList download : downloadLists)
                 {
-                    if (download.isCompleted () && !btnDeleteCompletedDisableFalse)
+                    if (download.isCompleted ())
                     {
-                        btnDeleteCompletedDisableFalse = true;
-                        Platform.runLater (() -> btnDeleteCompleted.setDisable (false));
+                        if (!btnDeleteCompletedDisableFalse)
+                        {
+                            btnDeleteCompletedDisableFalse = true;
+                            Platform.runLater (() -> btnDeleteCompleted.setDisable (false));
+                        }
                     }
+                    else if (btnResumeAll.isDisabled ()) btnResumeAll.setDisable (false);
+
                     Platform.runLater (() -> downloadList.getItems ().add (download));
                 }
                 Platform.runLater (() -> btnClearList.setDisable (false));
@@ -161,21 +163,16 @@ public final class MainController implements Initializable
     }
 
     @FXML
-    public void onClickBtnStop ()
-    {
-
-    }
-
-    @FXML
-    public void onClickBtnStopAll ()
-    {
-
-    }
-
-    @FXML
     public void onClickBtnResumeAll ()
     {
-
+        if (downloadLists != null && downloadLists.size () > 0)
+        {
+            for (final DownloadList list : downloadLists)
+            {
+                if (!list.isCompleted ())
+                    Platform.runLater (() -> DownloadPreparationController.LaunchFast (list.getLink () , list));
+            }
+        }
     }
 
     @FXML
@@ -231,13 +228,18 @@ public final class MainController implements Initializable
         {
             final DownloadList downloadList = downloadLists.get (selectedIndex);
             btnDownload.setDisable (false);
+
+            btnRedownload.setDisable (false);
+
             if (!downloadList.isCompleted ()) btnResume.setDisable (false);
+
             if (mouseEvent.getClickCount () == 2) onClickBtnDownload ();
         }
         else
         {
             btnResume.setDisable (true);
             btnDownload.setDisable (true);
+            btnRedownload.setDisable (true);
         }
     }
 
@@ -247,5 +249,13 @@ public final class MainController implements Initializable
         final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
         if (selectedIndex >= 0)
             DownloadPreparationController.Launch (null , downloadLists.get (selectedIndex));
+    }
+
+    @FXML
+    public void onClickBtnRedownload ()
+    {
+        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0)
+            DownloadPreparationController.LaunchFast2 (null , downloadLists.get (selectedIndex));
     }
 }

@@ -114,6 +114,8 @@ public final class DownloadPreparationController implements Initializable
 
     private boolean close = true;
 
+    private boolean launchFast = false, launchFast2 = false;
+
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
@@ -161,7 +163,7 @@ public final class DownloadPreparationController implements Initializable
 
             saveToDownloadList (done);
             if (done) btnDownloadCancel ();
-        }));
+        } , launchFast2));
     }
 
     @FXML
@@ -235,8 +237,19 @@ public final class DownloadPreparationController implements Initializable
     {
         Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
         {
+            controller.launchFast = true;
             controller.load (URL , _DownloadList , stage);
-            controller.onClickBtnDownloadNow ();
+        }));
+    }
+
+    // download ro sari anjam bede , montazer namone , yani saal ke file exists hast ham naporse
+    public static void LaunchFast2 (final String URL , final DownloadList _DownloadList)
+    {
+        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
+        {
+            controller.launchFast = true;
+            controller.launchFast2 = true;
+            controller.load (URL , _DownloadList , stage);
         }));
     }
 
@@ -285,6 +298,9 @@ public final class DownloadPreparationController implements Initializable
 
                 filesize = Size;
                 txtFilesize.setText ("Filesize: " + GetSize.Get (filesize));
+
+                if (launchFast) onClickBtnDownloadNow ();
+
                 return true;
             }
 
