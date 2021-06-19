@@ -6,6 +6,7 @@ import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -13,6 +14,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -44,6 +46,9 @@ public final class MainController implements Initializable
 
     @FXML
     public Button btnDeleteCompleted;
+
+    @FXML
+    public Button btnDownload;
 
 
     private List <DownloadList> downloadLists;
@@ -137,22 +142,6 @@ public final class MainController implements Initializable
         AddUrlController.Launch (URL -> DownloadPreparationController.Launch (URL , null));
     }
 
-    public void onClickTableView ()
-    {
-        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
-        if (selectedIndex >= 0)
-        {
-            try
-            {
-                final DownloadList downloadList = downloadLists.get (selectedIndex);
-                DownloadPreparationController.Launch (null , downloadList);
-            }
-            catch (final Exception e)
-            {
-                Log.N (e);
-            }
-        }
-    }
 
     @FXML
     public void onClickBtnAddListUrl ()
@@ -163,7 +152,12 @@ public final class MainController implements Initializable
     @FXML
     public void onClickBtnResume ()
     {
-
+        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0)
+        {
+            final DownloadList downloadList = downloadLists.get (selectedIndex);
+            if (!downloadList.isCompleted ()) DownloadPreparationController.LaunchFast (null , downloadList);
+        }
     }
 
     @FXML
@@ -227,5 +221,31 @@ public final class MainController implements Initializable
             }
             Platform.runLater (() -> btnDeleteCompleted.setText (textBtnDeleteCompleted));
         }).start ();
+    }
+
+    @FXML
+    public void onClickTableView (final MouseEvent mouseEvent)
+    {
+        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0)
+        {
+            final DownloadList downloadList = downloadLists.get (selectedIndex);
+            btnDownload.setDisable (false);
+            if (!downloadList.isCompleted ()) btnResume.setDisable (false);
+            if (mouseEvent.getClickCount () == 2) onClickBtnDownload ();
+        }
+        else
+        {
+            btnResume.setDisable (true);
+            btnDownload.setDisable (true);
+        }
+    }
+
+    @FXML
+    public void onClickBtnDownload ()
+    {
+        final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0)
+            DownloadPreparationController.Launch (null , downloadLists.get (selectedIndex));
     }
 }

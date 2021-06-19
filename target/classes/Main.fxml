@@ -11,22 +11,22 @@
             <Cursor fx:constant="HAND" />
         </cursor>
     </Button>
-    <Button fx:id="btnResume" disable="true" layoutX="295.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnResume" prefHeight="34.0" prefWidth="101.0" text="Resume">
+    <Button fx:id="btnResume" disable="true" layoutX="451.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnResume" prefHeight="34.0" prefWidth="64.0" text="Resume">
         <cursor>
             <Cursor fx:constant="HAND" />
         </cursor>
     </Button>
-    <Button fx:id="btnStop" disable="true" layoutX="526.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStop" prefHeight="34.0" prefWidth="101.0" text="Stop">
+    <Button fx:id="btnStop" disable="true" layoutX="610.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStop" prefHeight="34.0" prefWidth="64.0" text="Stop">
         <cursor>
             <Cursor fx:constant="HAND" />
         </cursor>
     </Button>
-    <Button fx:id="btnStopAll" disable="true" layoutX="637.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStopAll" prefHeight="34.0" prefWidth="101.0" text="Stop all">
+    <Button fx:id="btnStopAll" disable="true" layoutX="682.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStopAll" prefHeight="34.0" prefWidth="79.0" text="Stop all">
         <cursor>
             <Cursor fx:constant="HAND" />
         </cursor>
     </Button>
-    <Button fx:id="btnResumeAll" disable="true" layoutX="403.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnResumeAll" prefHeight="34.0" prefWidth="101.0" text="Resume all">
+    <Button fx:id="btnResumeAll" disable="true" layoutX="522.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnResumeAll" prefHeight="34.0" prefWidth="79.0" text="Resume all">
         <cursor>
             <Cursor fx:constant="HAND" />
         </cursor>
@@ -43,6 +43,11 @@
     </Button>
     <TableView fx:id="downloadList" layoutX="14.0" layoutY="59.0" onMouseClicked="#onClickTableView" prefHeight="471.0" prefWidth="1024.0" />
    <Button fx:id="btnDeleteCompleted" disable="true" layoutX="775.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnDeleteCompleted" prefHeight="34.0" prefWidth="127.0" text="Delete completed">
+      <cursor>
+         <Cursor fx:constant="HAND" />
+      </cursor>
+   </Button>
+   <Button fx:id="btnDownload" disable="true" layoutX="252.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnDownload" prefHeight="34.0" prefWidth="127.0" text="Download">
       <cursor>
          <Cursor fx:constant="HAND" />
       </cursor>

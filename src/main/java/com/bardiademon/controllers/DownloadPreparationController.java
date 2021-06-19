@@ -15,6 +15,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -26,6 +27,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.apache.commons.io.FilenameUtils;
 import java.io.File;
 import java.net.URL;
@@ -110,6 +112,8 @@ public final class DownloadPreparationController implements Initializable
     private ForInfo forInfo;
     private ListUrlController.LinkInformation forInfo_linkInformation;
 
+    private boolean close = true;
+
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
     {
@@ -136,30 +140,43 @@ public final class DownloadPreparationController implements Initializable
                 forInfo.GetDownloadList (forInfo_index , forInfo_linkInformation);
                 btnDownloadCancel ();
             }
-            else
-            {
-                DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
-                {
-                    if (done)
-                    {
-                        saveToDownloadList (true);
-                        btnDownloadCancel ();
-                    }
-                });
-            }
+            else startDownloading (filename , saveAs);
         }
         else showAlert ("Check info" , "Please check info" , "Filename Or Save As Or URL");
+    }
+
+    private void startDownloading (final String filename , final String saveAs)
+    {
+        close = false;
+        btnDownloadNow.setDisable (true);
+        btnDownloadLater.setDisable (true);
+        btnCancel.setDisable (true);
+
+        Platform.runLater (() -> DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
+        {
+            close = true;
+            btnDownloadNow.setDisable (false);
+            btnDownloadLater.setDisable (false);
+            btnCancel.setDisable (false);
+
+            saveToDownloadList (done);
+            if (done) btnDownloadCancel ();
+        }));
     }
 
     @FXML
     public void btnDownloadCancel ()
     {
-        Platform.runLater (() ->
+        if (close)
         {
-            downloadPreparation.close ();
-            downloadPreparation.hide ();
-            System.gc ();
-        });
+            Platform.runLater (() ->
+            {
+                downloadPreparation.close ();
+                downloadPreparation.hide ();
+                Main.getMainController ().refresh ();
+                System.gc ();
+            });
+        }
     }
 
     @FXML
@@ -212,6 +229,15 @@ public final class DownloadPreparationController implements Initializable
     {
         Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE ,
                 (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage)));
+    }
+
+    public static void LaunchFast (final String URL , final DownloadList _DownloadList)
+    {
+        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
+        {
+            controller.load (URL , _DownloadList , stage);
+            controller.onClickBtnDownloadNow ();
+        }));
     }
 
     public static void Launch (final String URL , final ListUrlController.LinkInformation _LinkInformation , final int Index , final ForInfo _ForInfo)
@@ -412,6 +438,9 @@ public final class DownloadPreparationController implements Initializable
 
     private void load (final String url , final DownloadList downloadList , final Stage downloadPreparation)
     {
+        downloadPreparation.setOnCloseRequest (Event::consume);
+        downloadPreparation.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> btnDownloadCancel ());
+
         downloadListService = new DownloadListService ();
 
         if (downloadList != null)
