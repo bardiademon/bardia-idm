@@ -158,8 +158,8 @@ public final class DownloadPreparationController implements Initializable
         {
             downloadPreparation.close ();
             downloadPreparation.hide ();
+            System.gc ();
         });
-        System.gc ();
     }
 
     @FXML
@@ -210,17 +210,17 @@ public final class DownloadPreparationController implements Initializable
 
     public static void Launch (final String URL , final DownloadList _DownloadList)
     {
-        Main.Launch ("DownloadPreparation" , TITLE ,
-                (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage));
+        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE ,
+                (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage)));
     }
 
     public static void Launch (final String URL , final ListUrlController.LinkInformation _LinkInformation , final int Index , final ForInfo _ForInfo)
     {
-        Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
+        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
         {
             controller.load (URL , _LinkInformation , stage);
             controller.forInfo (Index , _LinkInformation , _ForInfo);
-        });
+        }));
     }
 
     private void forInfo (final int index , final ListUrlController.LinkInformation _LinkInformation , final ForInfo forInfo)
@@ -254,6 +254,9 @@ public final class DownloadPreparationController implements Initializable
             public boolean OnConnected (final long Size , final File Path)
             {
                 txtConnectionMessage.setText ("Connected");
+
+                if (downloadList != null) downloadList.setStartedAt (LocalDateTime.now ());
+
                 filesize = Size;
                 txtFilesize.setText ("Filesize: " + GetSize.Get (filesize));
                 return true;

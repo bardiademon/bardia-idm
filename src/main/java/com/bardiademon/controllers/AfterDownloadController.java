@@ -105,13 +105,13 @@ public class AfterDownloadController implements Initializable
 
     public static void Launch (final String URL , final String Path , final String Size , final long SizeByte)
     {
-        Main.Launch ("AfterDownloaded" , "Downloaded was completed" , (Main.Controller <AfterDownloadController>) (controller , stage) -> Platform.runLater (() ->
+        Platform.runLater (() -> Main.Launch ("AfterDownloaded" , "Downloaded was completed" , (Main.Controller <AfterDownloadController>) (controller , stage) -> Platform.runLater (() ->
         {
             controller.txtURL.setText (URLDecoder.decode (URL , StandardCharsets.UTF_8));
             controller.txtPath.setText (Path);
             controller.txtSize.setText (String.format ("Downloaded %s (%d Bytes)" , Size , SizeByte));
             controller.stage = stage;
             controller.stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> controller.onClickBtnClose ());
-        }));
+        })));
     }
 }

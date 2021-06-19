@@ -60,6 +60,7 @@ public final class AddUrlController implements Initializable
                         }
                         catch (final Exception e)
                         {
+                            e.printStackTrace ();
                             showErrorMessage (e , url);
                         }
                     }).start ();
