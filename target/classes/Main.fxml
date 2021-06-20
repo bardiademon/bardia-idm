@@ -16,16 +16,6 @@
             <Cursor fx:constant="HAND" />
         </cursor>
     </Button>
-    <Button fx:id="btnStop" disable="true" layoutX="610.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStop" prefHeight="34.0" prefWidth="64.0" text="Stop">
-        <cursor>
-            <Cursor fx:constant="HAND" />
-        </cursor>
-    </Button>
-    <Button fx:id="btnStopAll" disable="true" layoutX="682.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnStopAll" prefHeight="34.0" prefWidth="79.0" text="Stop all">
-        <cursor>
-            <Cursor fx:constant="HAND" />
-        </cursor>
-    </Button>
     <Button fx:id="btnResumeAll" disable="true" layoutX="522.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnResumeAll" prefHeight="34.0" prefWidth="79.0" text="Resume all">
         <cursor>
             <Cursor fx:constant="HAND" />
@@ -47,12 +37,12 @@
          <Cursor fx:constant="HAND" />
       </cursor>
    </Button>
-   <Button fx:id="btnDownload" disable="true" layoutX="235.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnDownload" prefHeight="34.0" prefWidth="79.0" text="Download">
+   <Button fx:id="btnDownload" disable="true" layoutX="254.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnDownload" prefHeight="34.0" prefWidth="79.0" text="Download">
       <cursor>
          <Cursor fx:constant="HAND" />
       </cursor>
    </Button>
-   <Button fx:id="btnRedownload" disable="true" layoutX="325.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnRedownload" prefHeight="34.0" prefWidth="101.0" text="Redownload">
+   <Button fx:id="btnRedownload" disable="true" layoutX="339.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnRedownload" prefHeight="34.0" prefWidth="101.0" text="Redownload">
       <cursor>
          <Cursor fx:constant="HAND" />
       </cursor>

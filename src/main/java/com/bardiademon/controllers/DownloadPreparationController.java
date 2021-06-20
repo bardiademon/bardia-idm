@@ -330,6 +330,12 @@ public final class DownloadPreparationController implements Initializable
                 progress.setVisible (false);
                 txtConnectionMessage.setDisable (false);
             }
+
+            @Override
+            public void OnPrint (final String Message)
+            {
+                Log.N (Message);
+            }
         } , chkToHttps.isSelected ());
     }
 

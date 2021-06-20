@@ -5,6 +5,8 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
 
 <AnchorPane prefHeight="544.0" prefWidth="925.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.ListUrlController">
     <Button layoutX="24.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnAdd" prefHeight="25.0" prefWidth="114.0" text="Add" />
@@ -23,4 +25,9 @@
     <JFXComboBox fx:id="listsName" layoutX="570.0" layoutY="14.0" onAction="#onClickListname" prefHeight="25.0" prefWidth="175.0" />
    <Button fx:id="btnGetList" disable="true" layoutX="757.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnGetList" prefHeight="25.0" prefWidth="68.0" text="Get" />
    <Button fx:id="btnRemoveList" disable="true" layoutX="833.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickBtnRemoveList" prefHeight="25.0" prefWidth="68.0" text="Remove" />
+   <Text fx:id="txtTotalFileSize" layoutX="468.0" layoutY="445.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Total file size: 000 bytes" wrappingWidth="301.0">
+      <font>
+         <Font size="14.0" />
+      </font>
+   </Text>
 </AnchorPane>

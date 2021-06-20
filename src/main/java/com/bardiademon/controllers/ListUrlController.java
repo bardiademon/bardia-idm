@@ -3,6 +3,7 @@ package com.bardiademon.controllers;
 import com.bardiademon.Downloder.Download.Download;
 import com.bardiademon.Downloder.Download.OnInfoLink;
 import com.bardiademon.Main;
+import com.bardiademon.bardiademon.GetSize;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.ShowMessage;
 import com.bardiademon.models.DownloadList.DownloadList;
@@ -24,6 +25,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.text.Text;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -68,6 +70,12 @@ public final class ListUrlController implements Initializable
     @FXML
     public Button btnGetList;
 
+
+    private static final String TEXT_TOTAL_FILE_SIZE = "Total file size: :SIZE";
+    private long totalFileSize = 0;
+    @FXML
+    public Text txtTotalFileSize;
+
     private Stage stage;
 
     private DownloadListService downloadListService;
@@ -108,6 +116,26 @@ public final class ListUrlController implements Initializable
 
         txtPath.textProperty ().addListener ((observable , oldValue , newValue) -> btnSaveListSetDisable ());
         txtListname.textProperty ().addListener ((observable , oldValue , newValue) -> btnSaveListSetDisable ());
+    }
+
+
+    private void setTotalFileSize_Increase (final long size)
+    {
+        if (size <= 0) totalFileSize = 0;
+        else totalFileSize += size;
+        setTotalFileSize ();
+    }
+
+    private void setTotalFileSize_LowOff (final long size)
+    {
+        if (size >= totalFileSize) totalFileSize = 0;
+        else totalFileSize = Math.abs (totalFileSize - size);
+        setTotalFileSize ();
+    }
+
+    private void setTotalFileSize ()
+    {
+        Platform.runLater (() -> txtTotalFileSize.setText (TEXT_TOTAL_FILE_SIZE.replace (":SIZE" , GetSize.Get (totalFileSize))));
     }
 
     private void refresh ()
@@ -179,7 +207,7 @@ public final class ListUrlController implements Initializable
                     ShowMessage.Show (Alert.AlertType.INFORMATION , "Find" , "Several addresses were found from the selected file" , "Number of links found: " + urls.size ());
                     Platform.runLater (() ->
                     {
-                        addToList (Arrays.asList (urls.toArray (new String[] { })).toArray (new String[] { }));
+                        addToList (urls);
                         urls.clear ();
                         System.gc ();
                     });
@@ -229,6 +257,8 @@ public final class ListUrlController implements Initializable
         if (list.getItems ().size () > 0)
         {
             final int selectedIndex = list.getSelectionModel ().getSelectedIndex ();
+
+            setTotalFileSize_LowOff (linkInformation.get (selectedIndex).getByteSize ());
             list.getItems ().remove (selectedIndex);
             linkInformation.remove (selectedIndex);
         }
@@ -304,6 +334,7 @@ public final class ListUrlController implements Initializable
     {
         list.getItems ().clear ();
         linkInformation.clear ();
+        setTotalFileSize_LowOff (totalFileSize);
     }
 
     public static void Launch ()
@@ -311,16 +342,21 @@ public final class ListUrlController implements Initializable
         Main.Launch ("ListUrl" , "Add list" , (Main.Controller <ListUrlController>) (controller , stage) -> controller.stage = stage);
     }
 
-    private void addToList (final String... links)
+    private void addToList (final String link)
     {
-        addToList (true , links);
+        addToList (true , link);
+    }
+
+    private void addToList (final List <String> links)
+    {
+        addToList (true , links.toArray (new String[] { }));
     }
 
     private void addToList (final boolean save , final String... links)
     {
         new Thread (() ->
         {
-            final int start = (linkInformation.size () == 0 || !save ? 0 : linkInformation.size () - 1);
+            int start = (linkInformation.size () == 0 || !save ? 0 : linkInformation.size () - 1);
 
             if (save)
             {
@@ -332,7 +368,7 @@ public final class ListUrlController implements Initializable
                         linkInformation.setFilename (link);
                         linkInformation.setStatus ("Please wait...");
                         ListUrlController.this.linkInformation.add (linkInformation);
-                        list.getItems ().add (linkInformation);
+                        Platform.runLater (() -> list.getItems ().add (linkInformation));
                     }
                 }
             }
@@ -345,7 +381,7 @@ public final class ListUrlController implements Initializable
             final Download download = new Download ();
             try
             {
-                for (int i = start, len = links.length; i < len; i++) connect (save , i , download , links[i]);
+                for (final String link : links) connect (save , start++ , download , link);
             }
             catch (final Exception e)
             {
@@ -420,6 +456,7 @@ public final class ListUrlController implements Initializable
                             {
                                 try
                                 {
+                                    setTotalFileSize_LowOff (this.linkInformation.get (finalI).getByteSize ());
                                     list.getItems ().remove (finalI);
                                 }
                                 catch (final Exception e)
@@ -491,6 +528,7 @@ public final class ListUrlController implements Initializable
             {
                 try
                 {
+                    setTotalFileSize_Increase (Size);
                     ListUrlController.this.linkInformation.get (index).setSize (Size);
                     ListUrlController.this.linkInformation.get (index).setStatus ("Connected");
                 }
@@ -547,6 +585,11 @@ public final class ListUrlController implements Initializable
                     ListUrlController.this.notify ();
                     ListUrlController.this.notifyAll ();
                 }
+            }
+
+            @Override
+            public void OnPrint (final String Message)
+            {
             }
         });
         synchronized (ListUrlController.this)
@@ -663,10 +706,11 @@ public final class ListUrlController implements Initializable
                     Platform.runLater (list.getItems ()::clear);
 
                     linkInformation.clear ();
+                    setTotalFileSize_LowOff (totalFileSize);
                     System.gc ();
 
                     setTxtPath (lists.getPath ());
-                    txtListname.setText (lists.getName ());
+                    Platform.runLater (() -> txtListname.setText (lists.getName ()));
 
                     final List <DownloadList> downloadLists = lists.getDownloadLists ();
 
@@ -706,6 +750,8 @@ public final class ListUrlController implements Initializable
                 list.getItems ().clear ();
                 setTxtPath ("");
                 txtListname.setText ("");
+
+                setTotalFileSize_LowOff (totalFileSize);
 
                 Main.getMainController ().refresh ();
 

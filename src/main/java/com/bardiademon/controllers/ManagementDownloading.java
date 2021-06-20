@@ -5,7 +5,6 @@ import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.NT;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
-import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,13 +15,14 @@ public final class ManagementDownloading
 
     private int index = 0;
 
-    private static final int NUMBER_OF_SIMULTANEOUS_DOWNLOADS = 4;
+    private static final int NUMBER_OF_SIMULTANEOUS_DOWNLOADS = 2;
 
     private boolean stop;
 
     private final List <DownloadingController> downloadingController;
 
     private final DownloadListService downloadListService;
+
 
     public ManagementDownloading (final List <DownloadList> _DownloadLists , final Result _Result)
     {
@@ -38,8 +38,11 @@ public final class ManagementDownloading
         new Thread (() ->
         {
             stop = true;
-            for (final DownloadingController controller : downloadingController) controller.close (false);
-            downloadingController.clear ();
+            if (downloadingController != null && downloadingController.size () > 0)
+            {
+                for (final DownloadingController controller : downloadingController) controller.close (false);
+                downloadingController.clear ();
+            }
             System.gc ();
         }).start ();
     }
@@ -72,28 +75,24 @@ public final class ManagementDownloading
             return;
         }
 
-        downloadingController.add (DownloadingController.Launch (downloadList , done ->
+        DownloadingController.Launch (downloadList , done ->
         {
             try
             {
                 downloadList.setCompleted (done);
                 downloadListService.modify (downloadList);
-
                 NT.N (Main.getMainController ()::refresh);
-
-                Platform.runLater (() -> AfterDownloadController.Launch (downloadList.getLink () , downloadList.getPath () , downloadList.getSize () , downloadList.getByteSize ()));
-
                 launch (downloadLists.get (index++));
-
                 System.gc ();
             }
             catch (final Exception e)
             {
                 Log.N (e);
                 result.OnCompleted ();
+                stop ();
                 System.gc ();
             }
-        }));
+        } , true , downloadingController::add);
     }
 
     public interface Result

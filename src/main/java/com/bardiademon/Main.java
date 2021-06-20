@@ -69,12 +69,11 @@ public final class Main extends Application
             }
             catch (final IOException e)
             {
-                e.printStackTrace ();
                 Log.N (e);
             }
+
         }
         else Log.N (new Exception ("Resource is null."));
-
 
         return objController.controller;
     }

@@ -96,19 +96,40 @@ public class DownloadingController implements On
         close (false);
     }
 
-    public static DownloadingController Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult)
+    public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult)
     {
-        return Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult);
+        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , null);
     }
 
-    public static DownloadingController Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
+    public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult , final Controller _Controller)
     {
-        return Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false);
+        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , false , _Controller);
     }
 
-    public static DownloadingController Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast)
+    public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult , final boolean Fast , final Controller _Controller)
     {
-        return Main.Launch ("Downloading" , Filename , (controller , stage) ->
+        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , Fast , _Controller);
+    }
+
+
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
+    {
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false , null);
+    }
+
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast)
+    {
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , Fast , null);
+    }
+
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , Controller _Controller)
+    {
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false , _Controller);
+    }
+
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast , Controller _Controller)
+    {
+        Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
         {
             controller.url = URL;
             controller.filename = Filename;
@@ -121,13 +142,14 @@ public class DownloadingController implements On
             controller.fast = Fast;
             controller.run ();
 
+            if (_Controller != null) _Controller.Get (controller);
+
             controller.stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> new Thread (() ->
                     Platform.runLater (() -> controller.close (false))).start ());
-
         });
     }
 
-    private void run ()
+    public void run ()
     {
         txtURL.setText (url);
         download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , toHttps , this);
@@ -149,6 +171,7 @@ public class DownloadingController implements On
 
             if (DownloadingController.this.progress.getProgress () >= 1) close (true);
         });
+
     }
 
     public void close (final boolean done)
@@ -209,6 +232,18 @@ public class DownloadingController implements On
     }
 
     @Override
+    public void OnExistsFileError (final Exception E)
+    {
+        Log.N (E);
+    }
+
+    @Override
+    public void OnExistsFileErrorDeleteFile (final Exception E , final File _File)
+    {
+        Log.N ("OnExistsFileErrorDeleteFile" , E);
+    }
+
+    @Override
     public String OnEnterPath (final String Filename , final boolean JustDir)
     {
         return path;
@@ -229,7 +264,9 @@ public class DownloadingController implements On
     @Override
     public void OnDownloaded (final File Path)
     {
-        AfterDownloadController.Launch (txtURL.getText () , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ());
+        if (!invokeClose)
+            Platform.runLater (() -> AfterDownloadController.Launch (txtURL.getText () , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ()));
+
         close (true);
     }
 
@@ -278,13 +315,12 @@ public class DownloadingController implements On
     @Override
     public void OnErrorRenameFileExists (final Exception E)
     {
-
+        Log.N (E);
     }
 
     @Override
     public void OnCancelDownload ()
     {
-
     }
 
     @Override
@@ -311,6 +347,11 @@ public class DownloadingController implements On
 
     }
 
+    @Override
+    public void OnPrint (final String Message)
+    {
+    }
+
     private void runDownloadResult ()
     {
         if (!runDownloadResult && downloadResult != null)
@@ -320,8 +361,18 @@ public class DownloadingController implements On
         }
     }
 
+    public boolean isRunDownloadResult ()
+    {
+        return runDownloadResult;
+    }
+
     public interface DownloadResult
     {
         void Result (final boolean done);
+    }
+
+    public interface Controller
+    {
+        void Get (final DownloadingController Controller);
     }
 }
