@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="634.0" prefWidth="299.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.GroupsController">
+    <JFXComboBox fx:id="listGroupname" layoutX="12.0" layoutY="14.0" onAction="#onClickListGroupname" prefHeight="25.0" prefWidth="268.0" />
+    <JFXListView fx:id="listExtension" layoutX="13.0" layoutY="47.0" onMouseClicked="#onClickListExtension" prefHeight="400.0" prefWidth="268.0" />
+    <Button fx:id="btnAddGroup" layoutX="17.0" layoutY="509.0" mnemonicParsing="false" onAction="#onClickBtnAddGroup" prefHeight="25.0" prefWidth="59.0" text="Add" />
+    <Button fx:id="btnChangeGroup" disable="true" layoutX="117.0" layoutY="509.0" mnemonicParsing="false" onAction="#onClickBtnChangeGroup" prefHeight="25.0" prefWidth="59.0" text="Change" />
+    <Button fx:id="btnRemoveGroup" disable="true" layoutX="221.0" layoutY="509.0" mnemonicParsing="false" onAction="#onClickBtnRemoveGroup" text="Remove" />
+    <Button layoutX="18.0" layoutY="595.0" mnemonicParsing="false" onAction="#onClickBtnCLose" prefHeight="25.0" prefWidth="268.0" text="Close" />
+    <JFXButton fx:id="btnAddSelectedGroup" disable="true" layoutX="14.0" layoutY="453.0" onAction="#onClickBtnAddSelectedGroup" ripplerFill="#10ae1b" text="A" />
+    <JFXButton fx:id="btnRemoveSelectedItemGroup" disable="true" layoutX="38.0" layoutY="453.0" onAction="#onClickBtnRemoveSelectedItemGroup" ripplerFill="#ab2b11" text="R" />
+    <JFXButton fx:id="btnChangeSelectedItemGroup" disable="true" layoutX="64.0" layoutY="453.0" onAction="#onClickBtnChangeSelectedItemGroup" ripplerFill="#117380" text="C" />
+   <TextField fx:id="txtSelectedExtension" layoutX="102.0" layoutY="453.0" prefHeight="25.0" prefWidth="181.0" />
+   <TextField fx:id="txtSelectedGroupname" layoutX="17.0" layoutY="542.0" prefHeight="25.0" prefWidth="268.0" />
+</AnchorPane>

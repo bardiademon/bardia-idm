@@ -27,12 +27,12 @@
     <JFXButton fx:id="btnDownloadNow" layoutX="202.0" layoutY="463.0" onAction="#onClickBtnDownloadNow" text="Download now" />
     <JFXButton fx:id="btnCancel" layoutX="668.0" layoutY="472.0" onAction="#btnDownloadCancel" text="Cancel" />
     <JFXButton fx:id="btnDownloadLater" layoutX="434.0" layoutY="463.0" onAction="#onClickBtnDownloadLater" text="Download later" />
-    <JFXButton fx:id="btnAddGroup" layoutX="344.0" layoutY="89.0" text="+" />
+    <JFXButton fx:id="btnAddGroup" layoutX="344.0" layoutY="89.0" onAction="#onClickBtnAddGroup" text="+" />
     <Text fx:id="txtConnectionMessage" layoutX="23.0" layoutY="70.0" onMouseClicked="#onClickTxtConnectionMessage" strokeType="OUTSIDE" strokeWidth="0.0" text="Connection Message" wrappingWidth="608.0" />
-   <ProgressBar fx:id="progress" layoutX="14.0" layoutY="51.0" opacity="0.28" prefHeight="32.0" prefWidth="576.0" />
-   <TextField fx:id="txtURL" layoutX="53.0" layoutY="20.0" onKeyReleased="#onKeyReleasedTxtURL" prefHeight="25.0" prefWidth="596.0" />
-   <Text fx:id="txtPathStatus" layoutX="73.0" layoutY="219.0" onMouseClicked="#onClickTxtStatusPath" strokeType="OUTSIDE" strokeWidth="0.0" text=". . . " wrappingWidth="219.13671875" />
-   <TextField fx:id="txtSaveAs" editable="false" layoutX="67.0" layoutY="243.0" prefHeight="25.0" prefWidth="653.0" />
-   <Text fx:id="txtFilesize" layoutX="596.0" layoutY="71.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Filesize: " wrappingWidth="124.13671875" />
-   <CheckBox fx:id="chkToHttps" layoutX="656.0" layoutY="24.0" mnemonicParsing="false" onAction="#onClickChkToHttps" selected="true" text="To https" />
+    <ProgressBar fx:id="progress" layoutX="14.0" layoutY="51.0" opacity="0.28" prefHeight="32.0" prefWidth="576.0" />
+    <TextField fx:id="txtURL" layoutX="53.0" layoutY="20.0" onKeyReleased="#onKeyReleasedTxtURL" prefHeight="25.0" prefWidth="596.0" />
+    <Text fx:id="txtPathStatus" layoutX="73.0" layoutY="219.0" onMouseClicked="#onClickTxtStatusPath" strokeType="OUTSIDE" strokeWidth="0.0" text=". . . " wrappingWidth="219.13671875" />
+    <TextField fx:id="txtSaveAs" editable="false" layoutX="67.0" layoutY="243.0" prefHeight="25.0" prefWidth="653.0" />
+    <Text fx:id="txtFilesize" layoutX="596.0" layoutY="71.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Filesize: " wrappingWidth="124.13671875" />
+    <CheckBox fx:id="chkToHttps" layoutX="656.0" layoutY="24.0" mnemonicParsing="false" onAction="#onClickChkToHttps" selected="true" text="To https" />
 </AnchorPane>

@@ -52,4 +52,10 @@ public final class Groups
     {
         this.extensions = extensions;
     }
+
+    @Override
+    public String toString ()
+    {
+        return getName ();
+    }
 }

@@ -5,18 +5,12 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="112.0" prefWidth="754.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.bardiademon.controllers.DownloadFileIsExistsController">
-    <Text layoutX="14.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="This filename"/>
-    <TextField fx:id="txtFilename" layoutX="92.0" layoutY="19.0" prefHeight="25.0" prefWidth="582.0"
-               promptText="filename"/>
-    <Text layoutX="684.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="is exists"/>
-    <Button fx:id="btnResume" layoutX="131.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnResume"
-            text="Resume"/>
-    <Button fx:id="btnDelete" layoutX="196.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnDelete"
-            text="Delete previous file and download again"/>
-    <Button fx:id="btnRename" layoutX="432.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnRename"
-            text="Rename download file"/>
-    <Button fx:id="btnCancel" layoutX="571.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnCancel"
-            text="Cancel"/>
+<AnchorPane prefHeight="112.0" prefWidth="754.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.DownloadFileIsExistsController">
+    <Text layoutX="14.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="This filename" />
+    <TextField fx:id="txtFilename" layoutX="92.0" layoutY="19.0" prefHeight="25.0" prefWidth="582.0" promptText="filename" />
+    <Text layoutX="684.0" layoutY="36.0" strokeType="OUTSIDE" strokeWidth="0.0" text="is exists" />
+    <Button fx:id="btnResume" layoutX="131.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnResume" text="Resume" />
+    <Button fx:id="btnDelete" layoutX="196.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnDelete" text="Delete previous file and download again" />
+    <Button fx:id="btnRename" layoutX="432.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnRename" text="Rename download file" />
+    <Button fx:id="btnCancel" layoutX="571.0" layoutY="66.0" mnemonicParsing="false" onAction="#onClickBtnCancel" text="Cancel" />
 </AnchorPane>

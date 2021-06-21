@@ -200,7 +200,11 @@ public final class ListUrlController implements Initializable
             if (lines.size () > 0)
             {
                 final List <String> urls = new ArrayList <> ();
-                for (final String line : lines) urls.addAll (find (line));
+                for (final String line : lines)
+                {
+                    final List <String> strings = find (line);
+                    if (!urls.containsAll (strings)) urls.addAll (strings);
+                }
 
                 if (urls.size () > 0)
                 {
@@ -356,7 +360,7 @@ public final class ListUrlController implements Initializable
     {
         new Thread (() ->
         {
-            int start = (linkInformation.size () == 0 || !save ? 0 : linkInformation.size () - 1);
+            int start = (linkInformation.size () == 0 || !save ? 0 : linkInformation.size ());
 
             if (save)
             {
@@ -538,8 +542,6 @@ public final class ListUrlController implements Initializable
                     Log.N (e);
                 }
                 Platform.runLater (() -> list.getItems ().set (index , linkInformation.get (index)));
-                new Thread (ListUrlController.this::refresh).start ();
-
                 return true;
             }
 
@@ -550,7 +552,6 @@ public final class ListUrlController implements Initializable
                 {
                     ListUrlController.this.linkInformation.get (index).setFilename (Filename);
                     Platform.runLater (() -> list.getItems ().set (index , linkInformation.get (index)));
-                    new Thread (ListUrlController.this::refresh).start ();
                 }
                 catch (final Exception e)
                 {
@@ -573,7 +574,6 @@ public final class ListUrlController implements Initializable
                     ListUrlController.this.linkInformation.get (index).setSize (0);
                     ListUrlController.this.linkInformation.get (index).setStatus ("Error [" + E.getMessage () + "]");
                     Platform.runLater (() -> list.getItems ().set (index , linkInformation.get (index)));
-                    new Thread (ListUrlController.this::refresh).start ();
                 }
                 catch (final Exception e)
                 {
@@ -603,8 +603,6 @@ public final class ListUrlController implements Initializable
                 Log.N (e);
             }
         }
-        new Thread (this::refresh).start ();
-
         if (save)
         {
             final LinkInformation linkInformation = this.linkInformation.get (index);

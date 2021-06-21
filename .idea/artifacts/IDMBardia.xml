@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="IDMBardia">
+    <output-path>$PROJECT_DIR$/out/artifacts/IDMBardia</output-path>
+    <root id="root">
+      <element id="archive" name="IDMBardia.jar">
+        <element id="module-output" name="IDMBardia" />
+      </element>
+    </root>
+  </artifact>
+</component>

@@ -80,7 +80,7 @@ public class DownloadFileIsExistsController
 
     public static void Launch (final Result _Result , final String Filename , final boolean Resume)
     {
-        Main.Launch ("DownloadFileIsExists" , "Download file is exists" , (Main.Controller <DownloadFileIsExistsController>) (controller , stage) ->
+        Platform.runLater (() -> Main.Launch ("DownloadFileIsExists" , "Download file is exists" , (Main.Controller <DownloadFileIsExistsController>) (controller , stage) ->
         {
             controller.result = _Result;
             controller.stage = stage;
@@ -89,8 +89,9 @@ public class DownloadFileIsExistsController
                 controller.txtFilename.setText (Filename);
                 controller.btnResume.setDisable (!Resume);
             });
-        });
+        }));
     }
+
 
     public interface Result
     {

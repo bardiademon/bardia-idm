@@ -169,7 +169,7 @@ public class DownloadingController implements On
 
             txtDownloaded.setText (URLDecoder.decode (DownloadedString , StandardCharsets.UTF_8));
 
-            if (DownloadingController.this.progress.getProgress () >= 1) close (true);
+//            if (DownloadingController.this.progress.getProgress () >= 1) close (true);
         });
 
     }
@@ -240,7 +240,6 @@ public class DownloadingController implements On
     @Override
     public void OnExistsFileErrorDeleteFile (final Exception E , final File _File)
     {
-        Log.N ("OnExistsFileErrorDeleteFile" , E);
     }
 
     @Override

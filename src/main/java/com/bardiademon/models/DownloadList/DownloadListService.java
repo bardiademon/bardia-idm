@@ -71,51 +71,7 @@ public final class DownloadListService
 
     public boolean add (final DownloadList downloadList)
     {
-        if (Main.Database ().connected ())
-        {
-            if (downloadList.getLink () != null)
-            {
-                try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryAdd () , Statement.RETURN_GENERATED_KEYS))
-                {
-                    int counter = 0;
-                    statement.setString (++counter , downloadList.getLink ());
-                    statement.setString (++counter , downloadList.getPath ());
-                    statement.setBoolean (++counter , downloadList.isCompleted ());
-                    statement.setBoolean (++counter , downloadList.isCreatedDir ());
-
-                    final LocalDateTime startedAt = downloadList.getStartedAt ();
-                    statement.setTimestamp (++counter , (startedAt == null ? null : Timestamp.valueOf (startedAt)));
-
-                    statement.setLong (++counter , downloadList.getByteSize ());
-
-                    statement.setLong (++counter , downloadList.getListId ());
-
-                    Log.N ("Added");
-
-                    final boolean added = statement.executeUpdate () > 0;
-                    if (added)
-                    {
-                        try (ResultSet generatedKeys = statement.getGeneratedKeys ();)
-                        {
-                            generatedKeys.getLong (1);
-                        }
-                        catch (final SQLException e)
-                        {
-                            Log.N (e);
-                        }
-                    }
-
-                }
-                catch (final SQLException e)
-                {
-                    Log.N (e);
-                }
-            }
-            else Log.N (new Exception ("check (link,startedAt,size)"));
-        }
-        else Log.N (new Exception ("Database not connected"));
-
-        return false;
+        return addGetId (downloadList) > 0;
     }
 
     public List <DownloadList> findAll ()

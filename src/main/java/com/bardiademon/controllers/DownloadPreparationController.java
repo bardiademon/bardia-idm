@@ -15,6 +15,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -115,6 +116,8 @@ public final class DownloadPreparationController implements Initializable
     private boolean close = true;
 
     private boolean launchFast = false, launchFast2 = false;
+
+    private GroupsService groupsService;
 
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
@@ -314,10 +317,11 @@ public final class DownloadPreparationController implements Initializable
 
                     progress.setVisible (false);
                     txtConnectionMessage.setDisable (false);
+
+                    if (txtConnectionMessage.getText ().contains ("Connected") && !txtFilename.getText ().isEmpty ())
+                        setGroup ();
                 });
 
-                if (txtConnectionMessage.getText ().contains ("Connected") && !txtFilename.getText ().isEmpty ())
-                    setGroup ();
 
                 downloadListModify (false);
             }
@@ -334,7 +338,6 @@ public final class DownloadPreparationController implements Initializable
             @Override
             public void OnPrint (final String Message)
             {
-                Log.N (Message);
             }
         } , chkToHttps.isSelected ());
     }
@@ -355,17 +358,18 @@ public final class DownloadPreparationController implements Initializable
         if (groupsInfo != null && groupsInfo.size () > 0)
         {
             final String extension = FilenameUtils.getExtension (txtFilename.getText ());
-
-            final String path = txtPath.getText ();
-            for (int i = 0, len = groupsInfo.size (); i < len; i++)
+            final String path = groupsService.getPath (extension);
+            if (notEmpty (path))
             {
-                final Groups group = groupsInfo.get (i);
-                if (group.getExtensions ().contains (extension))
+                setTxtPath (path , txtFilename.getText ());
+                for (int i = 0, len = groupsInfo.size (); i < len; i++)
                 {
-                    final int finalI = i;
-                    Platform.runLater (() -> this.groups.getSelectionModel ().select (finalI));
-                    if (!notEmpty (path)) setTxtPath (group.getDefaultPath () , txtFilename.getText ());
-                    return;
+                    if (groupsInfo.get (i).getDefaultPath ().equals (path))
+                    {
+                        final int finalI = i;
+                        Platform.runLater (() -> this.groups.getSelectionModel ().select (finalI));
+                        break;
+                    }
                 }
             }
         }
@@ -480,14 +484,20 @@ public final class DownloadPreparationController implements Initializable
 
         this.downloadPreparation = downloadPreparation;
 
-        final GroupsService groupsService = new GroupsService ();
+        groupsService = new GroupsService ();
 
         groupsInfo = groupsService.getGroups ();
 
         if (groupsInfo != null)
         {
             for (final Groups group : groupsInfo)
-                this.groups.getItems ().addAll (String.format ("%s %s" , group.getName () , group.getExtensions ().toString ()));
+            {
+                String name = group.getName ();
+                if (group.getExtensions () != null && group.getExtensions ().size () > 0)
+                    name += " " + group.getExtensions ();
+
+                this.groups.getItems ().addAll (name);
+            }
 
         }
 
@@ -503,6 +513,12 @@ public final class DownloadPreparationController implements Initializable
     private void showAlert (final String title , final String headerText , final String content)
     {
         ShowMessage.Show (Alert.AlertType.ERROR , title , headerText , content);
+    }
+
+    @FXML
+    public void onClickBtnAddGroup ()
+    {
+        GroupsController.Launch (groupsInfo);
     }
 
     public interface ForInfo

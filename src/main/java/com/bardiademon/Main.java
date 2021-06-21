@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 
 public final class Main extends Application
@@ -43,7 +44,7 @@ public final class Main extends Application
 
     public static <T> T Launch (final String FXMLFilename , final String Title , final Controller <T> _Controller)
     {
-        final URL resource = (Main.class.getClassLoader ()).getResource (FXMLFilename + ".fxml");
+        final URL resource = GetResource (FXMLFilename + ".fxml");
 
         final var objController = new Object ()
         {
@@ -76,6 +77,22 @@ public final class Main extends Application
         else Log.N (new Exception ("Resource is null."));
 
         return objController.controller;
+    }
+
+    public static URL GetResource (final String Path)
+    {
+        try
+        {
+            final URL resource = (Main.class.getClassLoader ()).getResource (Path);
+            if (resource == null) throw new Exception ("Not found path resource: " + Path);
+            else return resource;
+        }
+        catch (final Exception e)
+        {
+            Log.N (e);
+        }
+
+        return null;
     }
 
     public interface Controller<T>
