@@ -27,7 +27,7 @@ public final class GroupsController implements Initializable
     public JFXComboBox <Groups> listGroupname;
 
     @FXML
-    public JFXListView <String> listExtension;
+    public JFXListView <Groups.Extensions> listExtension;
 
     @FXML
     public Button btnAddSelectedGroup;
@@ -54,7 +54,7 @@ public final class GroupsController implements Initializable
     public TextField txtSelectedGroupname;
 
     private List <Groups> groups;
-    private List <String> extensions;
+    private List <Groups.Extensions> extensions;
 
     private GroupsService groupsService;
     private int selectedGroupname = -1;
@@ -74,28 +74,34 @@ public final class GroupsController implements Initializable
     {
         if (selectedGroupname >= 0)
         {
-            final String extension = txtSelectedExtension.getText ();
-            if (extension != null && !extension.isEmpty ())
+            final String extensionName = txtSelectedExtension.getText ();
+            if (extensionName != null && !extensionName.isEmpty ())
             {
-                if (groupsService.getPath (extension) == null)
+                if (groupsService.getPath (extensionName) == null)
                 {
                     final Groups group = this.groups.get (selectedGroupname);
-                    final long extensionId = groupsService.addExtension (extension , group.getId ());
+                    final long extensionId = groupsService.addExtension (extensionName , group.getId ());
                     if (extensionId > 0)
                     {
-                        List <String> extensions = group.getExtensions ();
+                        List <Groups.Extensions> extensions = group.getExtensions ();
                         if (extensions == null) extensions = new ArrayList <> ();
+
+                        final Groups.Extensions extension = new Groups.Extensions ();
+                        extension.setExtension (extensionName);
+                        extension.setId (extensionId);
+
                         extensions.add (extension);
+
                         group.setExtensions (extensions);
                         groups.set (selectedGroupname , group);
                         selectedGroupname = -1;
                         refreshGroupname ();
-                        ShowMessage.Show (Alert.AlertType.INFORMATION , "Added extension" , "Extension was added" , "Extension: " + extension);
+                        ShowMessage.Show (Alert.AlertType.INFORMATION , "Added extension" , "Extension was added" , "Extension: " + extensionName);
                     }
-                    else errorAddRemoveExtension (extension , "adding");
+                    else errorAddRemoveExtension (extensionName , "adding");
                 }
                 else
-                    ShowMessage.Show (Alert.AlertType.ERROR , "Error add extension" , "This extension is exists" , "Extension: " + extension);
+                    ShowMessage.Show (Alert.AlertType.ERROR , "Error add extension" , "This extension is exists" , "Extension: " + extensionName);
             }
         }
     }
@@ -108,7 +114,7 @@ public final class GroupsController implements Initializable
         {
             final Groups group = this.groups.get (selectedGroupname);
 
-            final String extension = group.getExtensions ().get (selectedIndex);
+            final String extension = group.getExtensions ().get (selectedIndex).getExtension ();
             if (groupsService.removeExtension (extension , group.getId ()))
             {
                 group.getExtensions ().remove (selectedIndex);
@@ -128,7 +134,41 @@ public final class GroupsController implements Initializable
     @FXML
     public void onClickBtnChangeSelectedItemGroup ()
     {
-
+        final int selectedIndex = listExtension.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0 && selectedGroupname >= 0)
+        {
+            final String newExtension = txtSelectedExtension.getText ();
+            if (newExtension != null && !newExtension.isEmpty ())
+            {
+                try
+                {
+                    final Groups.Extensions extension = listExtension.getItems ().get (selectedIndex);
+                    if (!newExtension.equals (extension.getExtension ()))
+                    {
+                        if (groupsService.getPath (newExtension) == null)
+                        {
+                            if (groupsService.changeExtension (groups.get (selectedIndex).getId () , extension.getId () , newExtension))
+                            {
+                                extension.setExtension (newExtension);
+                                extensions.set (selectedIndex , extension);
+                                groups.get (selectedGroupname).setExtensions (extensions);
+                                selectedGroupname = -1;
+                                refreshGroupname ();
+                                ShowMessage.Show (Alert.AlertType.INFORMATION , "Updated" , "New extension changed successfully" , "New extension: " + newExtension);
+                            }
+                            else
+                                ShowMessage.Show (Alert.AlertType.ERROR , "Error update" , "An update error occurred" , "New extension: " + newExtension);
+                        }
+                        else
+                            ShowMessage.Show (Alert.AlertType.ERROR , "Error update" , "The new extension is duplicate" , "New extension: " + newExtension);
+                    }
+                }
+                catch (final Exception e)
+                {
+                    Log.N (e);
+                }
+            }
+        }
     }
 
     @FXML
@@ -329,6 +369,7 @@ public final class GroupsController implements Initializable
         btnRemoveSelectedItemGroup.setDisable (!selected);
         btnChangeSelectedItemGroup.setDisable (!selected);
 
-        if (selected) Platform.runLater (() -> txtSelectedExtension.setText (extensions.get (selectedIndex)));
+        if (selected)
+            Platform.runLater (() -> txtSelectedExtension.setText (extensions.get (selectedIndex).getExtension ()));
     }
 }

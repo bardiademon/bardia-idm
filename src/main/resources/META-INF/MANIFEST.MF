@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Main-Class: com.bardiademon.Main
+Class-Path: src.zip javafx-swt.jar javafx.web.jar javafx.base.jar javafx
+ .fxml.jar javafx.media.jar javafx.swing.jar javafx.controls.jar javafx.
+ graphics.jar url-detector-0.1.23.jar Download.jar javafx-fxml-16.jar ja
+ vafx-fxml-16-win.jar javafx-controls-16.jar javafx-controls-16-win.jar 
+ javafx-graphics-16.jar javafx-graphics-16-win.jar javafx-base-16.jar ja
+ vafx-base-16-win.jar commons-io-2.9.0.jar jfoenix-9.0.10.jar sqlite-jdb
+ c-3.34.0.jar charm-glisten-4.4.1.jar commons-lang3-3.3.1.jar
+

@@ -39,7 +39,7 @@ public final class GroupsService
                         group.setId (resultSet.getLong (ColumnsNames.id.name ()));
                         group.setName (resultSet.getString (ColumnsNames.name.name ()));
                         group.setDefaultPath (resultSet.getString (ColumnsNames.default_path.name ()));
-                        final List <String> allExtension = findAllExtension (group.getId ());
+                        final List <Groups.Extensions> allExtension = findAllExtension (group.getId ());
                         if (allExtension != null) group.setExtensions (allExtension);
                         groups.add (group);
                     }
@@ -56,7 +56,30 @@ public final class GroupsService
         return null;
     }
 
-    public List <String> findAllExtension (final long groupId)
+    public boolean changeExtension (final long groupId , final long id , final String extension)
+    {
+        if (Main.Database ().connected ())
+        {
+            try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryChangeExtension ()))
+            {
+                int counter = 0;
+                statement.setString (++counter , extension);
+                statement.setLong (++counter , id);
+                statement.setLong (++counter , groupId);
+
+                return statement.executeUpdate () > 0;
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+        }
+        else Log.N (Log.DATABASE_NOT_CONNECTED);
+
+        return false;
+    }
+
+    public List <Groups.Extensions> findAllExtension (final long groupId)
     {
         if (countFindAllExtension (groupId) > 0)
         {
@@ -65,10 +88,16 @@ public final class GroupsService
             {
                 statement.setLong (1 , groupId);
                 resultSet = statement.executeQuery ();
-                final List <String> extensions = new ArrayList <> ();
+                final List <Groups.Extensions> extensions = new ArrayList <> ();
 
                 while (resultSet.next ())
-                    extensions.add (resultSet.getString (ColumnsNamesGroupExtensions.extension.name ()));
+                {
+                    final Groups.Extensions extension = new Groups.Extensions ();
+                    extension.setId (resultSet.getLong (ColumnsNamesGroupExtensions.id.name ()));
+                    extension.setExtension (resultSet.getString (ColumnsNamesGroupExtensions.extension.name ()));
+
+                    extensions.add (extension);
+                }
 
                 return extensions;
             }
@@ -166,7 +195,7 @@ public final class GroupsService
                     {
                         group.setId (groupId);
 
-                        final List <String> extensions = group.getExtensions ();
+                        final List <Groups.Extensions> extensions = group.getExtensions ();
 
                         final int size;
                         if (extensions != null && (size = extensions.size ()) > 0)
@@ -176,7 +205,7 @@ public final class GroupsService
                                 int counter = 0;
                                 for (int i = 0; i < size; i++)
                                 {
-                                    statementExtension.setString (++counter , extensions.get (i));
+                                    statementExtension.setString (++counter , extensions.get (i).getExtension ());
                                     statementExtension.setLong (++counter , groupId);
                                 }
                                 statementExtension.executeUpdate ();
@@ -195,6 +224,12 @@ public final class GroupsService
         else Log.N (new Exception (Log.DATABASE_NOT_CONNECTED));
 
         return 0;
+    }
+
+    private String makeQueryChangeExtension ()
+    {
+        return String.format ("update \"%s\" set \"%s\" = ? where \"%s\" = ? and \"%s\" = ?" ,
+                TABLE_NAME_EXTENSIONS , ColumnsNamesGroupExtensions.extension , ColumnsNamesGroupExtensions.id , ColumnsNamesGroupExtensions.group_id);
     }
 
     public long addExtension (final String extension , final long groupId)
@@ -413,7 +448,9 @@ public final class GroupsService
 
     private String makeQueryFindAllExtension ()
     {
-        return String.format ("select * from \"%s\" where \"%s\"=?" , TABLE_NAME_EXTENSIONS , ColumnsNamesGroupExtensions.group_id.name ());
+        return String.format ("select \"%s\",\"%s\" from \"%s\" where \"%s\"=?" ,
+                ColumnsNamesGroupExtensions.id , ColumnsNamesGroupExtensions.extension ,
+                TABLE_NAME_EXTENSIONS , ColumnsNamesGroupExtensions.group_id.name ());
     }
 
     private String makeQueryCountFindAllExtension ()
