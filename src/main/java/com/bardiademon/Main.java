@@ -2,14 +2,19 @@ package com.bardiademon;
 
 import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.Log;
+import com.bardiademon.bardiademon.Path;
 import com.bardiademon.controllers.MainController;
+import com.bardiademon.controllers.ManagementClipboard;
 import com.bardiademon.models.Database;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 
@@ -19,7 +24,19 @@ public final class Main extends Application
 
     public static MainController mainController;
 
-    public static final Object Wait = new Object ();
+    private static Image IC_IDM;
+
+    static
+    {
+        try
+        {
+            IC_IDM = new Image (new FileInputStream (Path.IC_IDM));
+        }
+        catch (FileNotFoundException e)
+        {
+            Log.N (e);
+        }
+    }
 
     @Override
     public void start (final Stage primaryStage)
@@ -59,6 +76,20 @@ public final class Main extends Application
             stage.setTitle (Title);
             try
             {
+
+                Platform.runLater (() ->
+                {
+                    try
+                    {
+                        stage.getIcons ().clear ();
+                        stage.getIcons ().add (IC_IDM);
+                    }
+                    catch (final Exception e)
+                    {
+                        Log.N (e);
+                    }
+                });
+
                 stage.setScene (new Scene (fxmlLoader.load ()));
                 if (_Controller != null)
                 {
@@ -101,7 +132,11 @@ public final class Main extends Application
 
     public static void main (final String[] args)
     {
-        if (DATABASE.connected ()) launch (args);
+        if (DATABASE.connected ())
+        {
+            new ManagementClipboard ();
+            launch (args);
+        }
         else Log.N (new Exception ("Database not connected!"));
     }
 

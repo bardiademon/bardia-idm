@@ -10,10 +10,10 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Text?>
 
-<AnchorPane prefHeight="511.0" prefWidth="734.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.DownloadPreparationController">
+<AnchorPane onMouseMoved="#onMouseMovedForm" prefHeight="511.0" prefWidth="734.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.DownloadPreparationController">
     <Text layoutX="20.0" layoutY="37.0" strokeType="OUTSIDE" strokeWidth="0.0" text="URL" wrappingWidth="27.0703125" />
     <Text layoutX="18.0" layoutY="114.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Group" />
-    <JFXComboBox fx:id="groups" layoutX="73.0" layoutY="85.0" prefHeight="25.0" prefWidth="257.0" />
+    <JFXComboBox fx:id="groups" layoutX="73.0" layoutY="85.0" onAction="#onClickGroups" prefHeight="25.0" prefWidth="257.0" />
     <Text layoutX="11.0" layoutY="150.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Filename" />
     <TextField fx:id="txtFilename" layoutX="73.0" layoutY="133.0" onKeyReleased="#onKeyReleasedTxtFilename" prefHeight="25.0" prefWidth="653.0" />
     <Text layoutX="22.0" layoutY="190.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Path" />
@@ -35,4 +35,5 @@
     <TextField fx:id="txtSaveAs" editable="false" layoutX="67.0" layoutY="243.0" prefHeight="25.0" prefWidth="653.0" />
     <Text fx:id="txtFilesize" layoutX="596.0" layoutY="71.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Filesize: " wrappingWidth="124.13671875" />
     <CheckBox fx:id="chkToHttps" layoutX="656.0" layoutY="24.0" mnemonicParsing="false" onAction="#onClickChkToHttps" selected="true" text="To https" />
+   <JFXButton fx:id="btnSetDownloadPath" disable="true" layoutX="381.0" layoutY="97.0" onAction="#onClickBtnSetDownloadPath" text="Download path" />
 </AnchorPane>

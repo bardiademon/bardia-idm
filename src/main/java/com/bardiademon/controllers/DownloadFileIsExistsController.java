@@ -2,12 +2,14 @@ package com.bardiademon.controllers;
 
 import com.bardiademon.Downloder.Download.Download;
 import com.bardiademon.Main;
+import com.bardiademon.bardiademon.ShowMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.apache.commons.io.FilenameUtils;
 
 public class DownloadFileIsExistsController
 {
@@ -28,6 +30,8 @@ public class DownloadFileIsExistsController
 
     @FXML
     public Button btnCancel;
+
+    private String filename;
 
     @FXML
     public void onClickBtnResume ()
@@ -58,17 +62,16 @@ public class DownloadFileIsExistsController
         final String filename = txtFilename.getText ();
         if (filename != null && !filename.isEmpty ())
         {
-            result.Command (Download.FIEC_RENAME , filename);
-            stageClose ();
+            if (!FilenameUtils.getBaseName (this.filename).equals (filename))
+            {
+                System.out.println (this.filename);
+                result.Command (Download.FIEC_RENAME , this.filename);
+                stageClose ();
+            }
+            else
+                ShowMessage.Show (Alert.AlertType.ERROR , "Error filename" , "The file name is duplicate" , "Filename: " + filename);
         }
-        else
-        {
-            final Alert alert = new Alert (Alert.AlertType.ERROR);
-            alert.setContentText ("Filename is empty!");
-            alert.setHeaderText (filename);
-            alert.setTitle ("Filename error!");
-            alert.show ();
-        }
+        else ShowMessage.Show (Alert.AlertType.ERROR , "Filename error!" , "Filename is empty!" , "");
     }
 
     @FXML
@@ -84,9 +87,10 @@ public class DownloadFileIsExistsController
         {
             controller.result = _Result;
             controller.stage = stage;
+            controller.filename = Filename;
             Platform.runLater (() ->
             {
-                controller.txtFilename.setText (Filename);
+                controller.txtFilename.setText (FilenameUtils.getBaseName (controller.filename));
                 controller.btnResume.setDisable (!Resume);
             });
         }));

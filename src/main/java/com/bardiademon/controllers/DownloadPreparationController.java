@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
-public final class DownloadPreparationController implements Initializable
+public final class DownloadPreparationController extends Controller implements Initializable
 {
     private static final String TITLE = "Downloaded Preparation - " + Default.APP_NAME;
 
@@ -97,6 +97,9 @@ public final class DownloadPreparationController implements Initializable
     @FXML
     public CheckBox chkToHttps;
 
+    @FXML
+    public JFXButton btnSetDownloadPath;
+
     private Stage downloadPreparation;
     private String url;
 
@@ -118,6 +121,13 @@ public final class DownloadPreparationController implements Initializable
     private boolean launchFast = false, launchFast2 = false;
 
     private GroupsService groupsService;
+
+    private int selectedGroup = -1;
+
+    /*
+     * baraye ke vagti group set mishe va download list khodesh path dare male group set nashe bar aval
+     */
+    private boolean onClickGroup = false;
 
     @Override
     public void initialize (final URL url , final ResourceBundle resourceBundle)
@@ -232,14 +242,19 @@ public final class DownloadPreparationController implements Initializable
 
     public static void Launch (final String URL , final DownloadList _DownloadList)
     {
-        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE ,
-                (Main.Controller <DownloadPreparationController>) (controller , stage) -> controller.load (URL , _DownloadList , stage)));
+        Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
+        {
+            controller.stage = stage;
+            stage.setAlwaysOnTop (true);
+            controller.load (URL , _DownloadList , stage);
+        }));
     }
 
     public static void LaunchFast (final String URL , final DownloadList _DownloadList)
     {
         Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
         {
+            controller.stage = stage;
             controller.launchFast = true;
             controller.load (URL , _DownloadList , stage);
         }));
@@ -250,6 +265,7 @@ public final class DownloadPreparationController implements Initializable
     {
         Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
         {
+            controller.stage = stage;
             controller.launchFast = true;
             controller.launchFast2 = true;
             controller.load (URL , _DownloadList , stage);
@@ -260,6 +276,7 @@ public final class DownloadPreparationController implements Initializable
     {
         Platform.runLater (() -> Main.Launch ("DownloadPreparation" , TITLE , (Main.Controller <DownloadPreparationController>) (controller , stage) ->
         {
+            controller.stage = stage;
             controller.load (URL , _LinkInformation , stage);
             controller.forInfo (Index , _LinkInformation , _ForInfo);
         }));
@@ -339,6 +356,12 @@ public final class DownloadPreparationController implements Initializable
             public void OnPrint (final String Message)
             {
             }
+
+            @Override
+            public void OnCancelDownload ()
+            {
+
+            }
         } , chkToHttps.isSelected ());
     }
 
@@ -361,7 +384,9 @@ public final class DownloadPreparationController implements Initializable
             final String path = groupsService.getPath (extension);
             if (notEmpty (path))
             {
-                setTxtPath (path , txtFilename.getText ());
+                if (downloadList != null && (downloadList.getPath () == null || downloadList.getPath ().isEmpty ()))
+                    setTxtPath (path , txtFilename.getText ());
+
                 for (int i = 0, len = groupsInfo.size (); i < len; i++)
                 {
                     if (groupsInfo.get (i).getDefaultPath ().equals (path))
@@ -373,6 +398,18 @@ public final class DownloadPreparationController implements Initializable
                 }
             }
         }
+    }
+
+    private void setGroup (final int selected)
+    {
+        if (!onClickGroup && downloadPathIdEmpty ()) onClickGroup = true;
+
+        if (groupsInfo != null && groupsInfo.size () > 0 && onClickGroup)
+        {
+            final String path = groupsInfo.get (selected).getDefaultPath ();
+            if (notEmpty (path)) setTxtPath (path , txtFilename.getText ());
+        }
+        if (!onClickGroup) onClickGroup = true;
     }
 
     private void setTxtPath (final String path , final String filename)
@@ -473,8 +510,8 @@ public final class DownloadPreparationController implements Initializable
         {
             this.downloadList = downloadList;
 
-            if (downloadList.getPath () != null)
-                setTxtPath (new File (downloadList.getPath ()).getParent () , FilenameUtils.getName (downloadList.getPath ()));
+            btnSetDownloadPath.setDisable (false);
+            onClickBtnSetDownloadPath ();
 
             setTxtURL (downloadList.getLink ());
             txtDescription.setText (downloadList.getDescription ());
@@ -521,9 +558,35 @@ public final class DownloadPreparationController implements Initializable
         GroupsController.Launch (groupsInfo);
     }
 
+    @FXML
+    public void onClickGroups ()
+    {
+        final int selectedIndex = groups.getSelectionModel ().getSelectedIndex ();
+        if (selectedIndex >= 0 && selectedIndex != selectedGroup) setGroup ((selectedGroup = selectedIndex));
+    }
+
+    @FXML
+    public void onMouseMovedForm ()
+    {
+        if (stage.isAlwaysOnTop ()) stage.setAlwaysOnTop (false);
+    }
+
+    @FXML
+    public void onClickBtnSetDownloadPath ()
+    {
+        if (!downloadPathIdEmpty ())
+            setTxtPath (new File (downloadList.getPath ()).getParent () , FilenameUtils.getName (downloadList.getPath ()));
+    }
+
+    private boolean downloadPathIdEmpty ()
+    {
+        return downloadList == null || downloadList.getPath () == null || downloadList.getPath ().isEmpty ();
+    }
+
     public interface ForInfo
     {
         void GetDownloadList (final int Index , final ListUrlController.LinkInformation _LinkInformation);
+
     }
 
     @FXML

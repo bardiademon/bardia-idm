@@ -79,6 +79,29 @@ public final class GroupsService
         return false;
     }
 
+    public boolean changeGroup (final Groups group)
+    {
+        if (Main.Database ().connected ())
+        {
+            try (final PreparedStatement statement = Main.Database ().getConnection ().prepareStatement (makeQueryChangeGroup ()))
+            {
+                int counter = 0;
+                statement.setString (++counter , group.getName ());
+                statement.setString (++counter , group.getDefaultPath ());
+                statement.setLong (++counter , group.getId ());
+
+                return statement.executeUpdate () > 0;
+            }
+            catch (final SQLException e)
+            {
+                Log.N (e);
+            }
+        }
+        else Log.N (Log.DATABASE_NOT_CONNECTED);
+
+        return false;
+    }
+
     public List <Groups.Extensions> findAllExtension (final long groupId)
     {
         if (countFindAllExtension (groupId) > 0)
@@ -230,6 +253,12 @@ public final class GroupsService
     {
         return String.format ("update \"%s\" set \"%s\" = ? where \"%s\" = ? and \"%s\" = ?" ,
                 TABLE_NAME_EXTENSIONS , ColumnsNamesGroupExtensions.extension , ColumnsNamesGroupExtensions.id , ColumnsNamesGroupExtensions.group_id);
+    }
+
+    private String makeQueryChangeGroup ()
+    {
+        return String.format ("update \"%s\" set \"%s\" = ? , \"%s\" = ? where \"%s\" = ?" ,
+                TABLE_NAME , ColumnsNames.name , ColumnsNames.default_path , ColumnsNames.id);
     }
 
     public long addExtension (final String extension , final long groupId)

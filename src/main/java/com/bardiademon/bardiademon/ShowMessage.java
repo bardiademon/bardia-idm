@@ -13,12 +13,19 @@ public final class ShowMessage
     {
         Platform.runLater (() ->
         {
-            final Alert alert = new Alert (_AlertType);
-            alert.setTitle (Title);
-            alert.setContentText (Content);
-            alert.setHeaderText (Header);
-            alert.showAndWait ();
-            System.gc ();
+            try
+            {
+                final Alert alert = new Alert (_AlertType);
+                alert.setTitle (Title);
+                alert.setContentText (Content);
+                alert.setHeaderText (Header);
+                alert.show ();
+                System.gc ();
+            }
+            catch (final Exception e)
+            {
+                Log.N (e);
+            }
         });
     }
 }

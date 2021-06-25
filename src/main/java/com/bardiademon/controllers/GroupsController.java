@@ -53,6 +53,9 @@ public final class GroupsController implements Initializable
     @FXML
     public TextField txtSelectedGroupname;
 
+    @FXML
+    public TextField txtDefaultPath;
+
     private List <Groups> groups;
     private List <Groups.Extensions> extensions;
 
@@ -231,7 +234,34 @@ public final class GroupsController implements Initializable
     @FXML
     public void onClickBtnChangeGroup ()
     {
+        if (selectedGroupname >= 0)
+        {
+            final Groups group = this.groups.get (selectedGroupname);
 
+            final String newGroupname = txtSelectedGroupname.getText ();
+            if (newGroupname != null && !newGroupname.isEmpty () && !group.getName ().equals (newGroupname))
+                group.setName (newGroupname);
+
+            final DirectoryChooser chooser = new DirectoryChooser ();
+            final File file;
+            final String defaultPath = group.getDefaultPath ();
+            if (defaultPath != null && !defaultPath.isEmpty () && (file = new File (defaultPath)).exists ())
+                chooser.setInitialDirectory (file);
+
+            File selectedDir = chooser.showDialog (null);
+            if (selectedDir != null)
+                group.setDefaultPath (selectedDir.getAbsolutePath ());
+
+            if (groupsService.changeGroup (group))
+            {
+                groups.set (selectedGroupname , group);
+                selectedGroupname = -1;
+                refreshGroupname ();
+                ShowMessage.Show (Alert.AlertType.INFORMATION , "Updated" , "Group changed successfully" , "Group: " + group.getName ());
+            }
+            else
+                ShowMessage.Show (Alert.AlertType.INFORMATION , "Error updated" , "Updating encountered an error" , "Group: " + group.getName ());
+        }
     }
 
     @FXML
@@ -349,7 +379,11 @@ public final class GroupsController implements Initializable
                 selectedGroupname = selectedIndex;
                 extensions = groups.get (selectedGroupname).getExtensions ();
 
-                Platform.runLater (() -> txtSelectedGroupname.setText (groups.get (selectedGroupname).getName ()));
+                Platform.runLater (() ->
+                {
+                    txtSelectedGroupname.setText (groups.get (selectedGroupname).getName ());
+                    txtDefaultPath.setText (groups.get (selectedGroupname).getDefaultPath ());
+                });
 
                 refreshExtension ();
             }

@@ -261,10 +261,16 @@ public final class ListUrlController implements Initializable
         if (list.getItems ().size () > 0)
         {
             final int selectedIndex = list.getSelectionModel ().getSelectedIndex ();
-
-            setTotalFileSize_LowOff (linkInformation.get (selectedIndex).getByteSize ());
+            try
+            {
+                setTotalFileSize_LowOff (linkInformation.get (selectedIndex).getByteSize ());
+                linkInformation.remove (selectedIndex);
+            }
+            catch (final Exception e)
+            {
+                Log.N (e);
+            }
             list.getItems ().remove (selectedIndex);
-            linkInformation.remove (selectedIndex);
         }
     }
 
@@ -380,7 +386,7 @@ public final class ListUrlController implements Initializable
 
             System.gc ();
 
-            if (save && start + 1 >= linkInformation.size ()) return;
+//            if (!save && start + 1 >= linkInformation.size ()) return;
 
             final Download download = new Download ();
             try
@@ -400,7 +406,6 @@ public final class ListUrlController implements Initializable
             System.gc ();
 
         }).start ();
-
     }
 
 
@@ -590,6 +595,12 @@ public final class ListUrlController implements Initializable
             @Override
             public void OnPrint (final String Message)
             {
+            }
+
+            @Override
+            public void OnCancelDownload ()
+            {
+
             }
         });
         synchronized (ListUrlController.this)
