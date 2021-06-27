@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -45,6 +46,8 @@ public final class MainController implements Initializable
     @FXML
     public Button btnRedownload;
 
+    @FXML
+    public CheckBox chkClipboardListener;
 
     private List <DownloadList> downloadLists;
 
@@ -87,6 +90,7 @@ public final class MainController implements Initializable
         downloadList.getColumns ().addAll (Arrays.asList (id , link , path , size , startedAt , endAt , time , downloaded , createdDir , description));
 
         refresh ();
+        onClickChkClipboardListener ();
     }
 
     public void refresh ()
@@ -257,5 +261,11 @@ public final class MainController implements Initializable
         final int selectedIndex = downloadList.getSelectionModel ().getSelectedIndex ();
         if (selectedIndex >= 0)
             DownloadPreparationController.LaunchFast2 (null , downloadLists.get (selectedIndex));
+    }
+
+    @FXML
+    public void onClickChkClipboardListener ()
+    {
+        Main.SetActiveManagementClipboard (chkClipboardListener.isSelected ());
     }
 }

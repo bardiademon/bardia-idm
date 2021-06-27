@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="544.0" prefWidth="1051.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.MainController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="572.0" prefWidth="1051.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.bardiademon.controllers.MainController">
     <Button fx:id="btnAddUrl" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#onClickAddUrl" prefHeight="34.0" prefWidth="101.0" text="Add URL">
         <cursor>
             <Cursor fx:constant="HAND" />
@@ -47,4 +46,5 @@
          <Cursor fx:constant="HAND" />
       </cursor>
    </Button>
+   <CheckBox fx:id="chkClipboardListener" layoutX="14.0" layoutY="539.0" mnemonicParsing="false" onAction="#onClickChkClipboardListener" text="Clipboard listener" />
 </AnchorPane>

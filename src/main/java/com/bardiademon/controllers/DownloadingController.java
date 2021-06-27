@@ -12,9 +12,9 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -27,14 +27,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DownloadingController implements On
 {
 
+    @FXML
+    public Text txtDownloadedOfFilesize;
+
+    @FXML
+    public Text txtCenterProgressDownloaded;
+
+    @FXML
+    public Label txtFilename;
+
+    @FXML
+    public Text txtDownloadedOfFilesize_byte;
+
     private String url, filename, path;
     private boolean createDir, theNameHasNoSuffix, toHttps;
     private Stage stage;
     private DownloadResult downloadResult;
     private Download download;
-
-    @FXML
-    public TextField txtURL;
 
     @FXML
     public Text txtDownloaded;
@@ -62,6 +71,8 @@ public class DownloadingController implements On
     private boolean runDownloadResult = false;
 
     private boolean fast;
+
+    private long filesize = 0;
 
     // for method close ,
     // downloadResult.Result (done);
@@ -111,7 +122,6 @@ public class DownloadingController implements On
         Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , Fast , _Controller);
     }
 
-
     public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
     {
         Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false , null);
@@ -129,7 +139,7 @@ public class DownloadingController implements On
 
     public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast , Controller _Controller)
     {
-        Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
+        Platform.runLater (() -> Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
         {
             controller.url = URL;
             controller.filename = Filename;
@@ -140,19 +150,26 @@ public class DownloadingController implements On
             controller.downloadResult = _DownloadResult;
             controller.toHttps = ToHttps;
             controller.fast = Fast;
+
+            controller.txtFilename.setText (Filename);
+
             controller.run ();
 
             if (_Controller != null) _Controller.Get (controller);
-
             controller.stage.getScene ().getWindow ().addEventFilter (WindowEvent.WINDOW_CLOSE_REQUEST , windowEvent -> new Thread (() ->
                     Platform.runLater (() -> controller.close (false))).start ());
-        });
+        }));
     }
 
     public void run ()
     {
-        txtURL.setText (url);
         download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , toHttps , this);
+    }
+
+    public void setTxtDownloadedOfFilesize (final long size)
+    {
+        txtDownloadedOfFilesize.setText (String.format ("%s of %s Downloaded" , GetSize.Get (size) , GetSize.Get (filesize)));
+        txtDownloadedOfFilesize_byte.setText (String.format ("%d byte of %d byte Downloaded" , size , filesize));
     }
 
     @Override
@@ -163,13 +180,8 @@ public class DownloadingController implements On
             txtSpeed.setText (Speed);
             txtTime.setText (Time);
 
-            final float progress = (float) Percent / 100;
-            DownloadingController.this.progress.setProgress (progress);
-            DownloadingController.this.circleProgress.setProgress (progress);
-
-            txtDownloaded.setText (URLDecoder.decode (DownloadedString , StandardCharsets.UTF_8));
-
-//            if (DownloadingController.this.progress.getProgress () >= 1) close (true);
+            setProgress (Percent);
+            setTxtDownloadedOfFilesize (DownloadedLong);
         });
 
     }
@@ -184,6 +196,7 @@ public class DownloadingController implements On
     @Override
     public boolean OnConnected (final long Size , final File Path)
     {
+        filesize = Size;
         return true;
     }
 
@@ -264,7 +277,7 @@ public class DownloadingController implements On
     public void OnDownloaded (final File Path)
     {
         if (!invokeClose)
-            Platform.runLater (() -> AfterDownloadController.Launch (txtURL.getText () , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ()));
+            Platform.runLater (() -> AfterDownloadController.Launch (url , Path.getAbsolutePath () , GetSize.Get (Path.length ()) , Path.length ()));
 
         close (true);
     }
@@ -360,9 +373,12 @@ public class DownloadingController implements On
         }
     }
 
-    public boolean isRunDownloadResult ()
+    private void setProgress (final int percent)
     {
-        return runDownloadResult;
+        final float progress = (float) percent / 100;
+        this.progress.setProgress (progress);
+        this.circleProgress.setProgress (progress);
+        txtCenterProgressDownloaded.setText (String.format ("Downloaded: %d%%" , percent));
     }
 
     public interface DownloadResult

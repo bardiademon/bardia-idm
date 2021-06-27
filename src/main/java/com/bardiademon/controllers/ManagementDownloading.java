@@ -5,6 +5,7 @@ import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.NT;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
+import javafx.application.Platform;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,24 +76,23 @@ public final class ManagementDownloading
             return;
         }
 
-        DownloadingController.Launch (downloadList , done ->
+        Platform.runLater (() -> DownloadingController.Launch (downloadList , done ->
         {
             try
             {
                 downloadList.setCompleted (done);
                 downloadListService.modify (downloadList);
                 NT.N (Main.getMainController ()::refresh);
-                launch (downloadLists.get (index++));
+                launch (downloadLists.get (++index));
                 System.gc ();
             }
             catch (final Exception e)
             {
                 Log.N (e);
                 result.OnCompleted ();
-                stop ();
                 System.gc ();
             }
-        } , true , downloadingController::add);
+        } , true , downloadingController::add));
     }
 
     public interface Result

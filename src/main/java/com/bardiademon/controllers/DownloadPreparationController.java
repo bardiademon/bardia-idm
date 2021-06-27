@@ -15,7 +15,6 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -319,8 +318,6 @@ public final class DownloadPreparationController extends Controller implements I
                 filesize = Size;
                 txtFilesize.setText ("Filesize: " + GetSize.Get (filesize));
 
-                if (launchFast) onClickBtnDownloadNow ();
-
                 return true;
             }
 
@@ -336,7 +333,11 @@ public final class DownloadPreparationController extends Controller implements I
                     txtConnectionMessage.setDisable (false);
 
                     if (txtConnectionMessage.getText ().contains ("Connected") && !txtFilename.getText ().isEmpty ())
+                    {
                         setGroup ();
+                        if (launchFast) onClickBtnDownloadNow ();
+                    }
+
                 });
 
 
@@ -586,7 +587,6 @@ public final class DownloadPreparationController extends Controller implements I
     public interface ForInfo
     {
         void GetDownloadList (final int Index , final ListUrlController.LinkInformation _LinkInformation);
-
     }
 
     @FXML

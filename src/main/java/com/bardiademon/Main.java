@@ -3,9 +3,11 @@ package com.bardiademon;
 import com.bardiademon.bardiademon.Default;
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.Path;
+import com.bardiademon.controllers.DownloadingController;
 import com.bardiademon.controllers.MainController;
 import com.bardiademon.controllers.ManagementClipboard;
 import com.bardiademon.models.Database;
+import com.bardiademon.models.DownloadList.DownloadList;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
@@ -23,6 +25,8 @@ public final class Main extends Application
     public static final Database DATABASE = new Database ();
 
     public static MainController mainController;
+
+    private static final ManagementClipboard MANAGEMENT_CLIPBOARD = new ManagementClipboard ();
 
     private static Image IC_IDM;
 
@@ -89,7 +93,6 @@ public final class Main extends Application
                         Log.N (e);
                     }
                 });
-
                 stage.setScene (new Scene (fxmlLoader.load ()));
                 if (_Controller != null)
                 {
@@ -132,12 +135,13 @@ public final class Main extends Application
 
     public static void main (final String[] args)
     {
-        if (DATABASE.connected ())
-        {
-            new ManagementClipboard ();
-            launch (args);
-        }
+        if (DATABASE.connected ()) launch (args);
         else Log.N (new Exception ("Database not connected!"));
+    }
+
+    public static void SetActiveManagementClipboard (final boolean Active)
+    {
+        MANAGEMENT_CLIPBOARD.setActive (Active);
     }
 
     public static Database Database ()
