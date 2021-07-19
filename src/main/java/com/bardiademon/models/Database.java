@@ -2,6 +2,7 @@ package com.bardiademon.models;
 
 import com.bardiademon.bardiademon.Log;
 import com.bardiademon.bardiademon.Path;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -52,9 +53,20 @@ public final class Database
 
     public boolean connected ()
     {
+        return connected (true);
+    }
+
+    private boolean connected (final boolean reconnect)
+    {
         try
         {
-            return (connection != null && !connection.isClosed ());
+            if (connection != null && !connection.isClosed ()) return true;
+            else if (reconnect)
+            {
+                connect ();
+                return connected (false);
+            }
+            else return false;
         }
         catch (final SQLException e)
         {

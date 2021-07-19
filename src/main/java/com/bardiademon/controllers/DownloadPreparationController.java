@@ -19,17 +19,20 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.commons.io.FilenameUtils;
+
+import java.awt.Desktop;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -94,9 +97,6 @@ public final class DownloadPreparationController extends Controller implements I
     public ProgressBar progress;
 
     @FXML
-    public CheckBox chkToHttps;
-
-    @FXML
     public JFXButton btnSetDownloadPath;
 
     private Stage downloadPreparation;
@@ -148,7 +148,6 @@ public final class DownloadPreparationController extends Controller implements I
                 forInfo_linkInformation.setFilename (filename);
                 forInfo_linkInformation.setPath (saveAs);
                 forInfo_linkInformation.setLink (url);
-                forInfo_linkInformation.setToHttps (chkToHttps.isSelected ());
                 forInfo_linkInformation.setCreatedDir (chkCreateFolder.isSelected ());
                 forInfo_linkInformation.setTheNameHasNoSuffix (chkTheNameHasNoSuffix.isSelected ());
                 forInfo.GetDownloadList (forInfo_index , forInfo_linkInformation);
@@ -166,7 +165,7 @@ public final class DownloadPreparationController extends Controller implements I
         btnDownloadLater.setDisable (true);
         btnCancel.setDisable (true);
 
-        Platform.runLater (() -> DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , chkToHttps.isSelected () , done ->
+        Platform.runLater (() -> DownloadingController.Launch (url , filename , saveAs , chkCreateFolder.isSelected () , chkTheNameHasNoSuffix.isSelected () , done ->
         {
             close = true;
             btnDownloadNow.setDisable (false);
@@ -181,16 +180,14 @@ public final class DownloadPreparationController extends Controller implements I
     @FXML
     public void btnDownloadCancel ()
     {
-        if (close)
+        if (close) Platform.runLater (() ->
         {
-            Platform.runLater (() ->
-            {
-                downloadPreparation.close ();
-                downloadPreparation.hide ();
-                Main.getMainController ().refresh ();
-                System.gc ();
-            });
-        }
+            downloadPreparation.close ();
+            downloadPreparation.hide ();
+            Main.getMainController ().refresh ();
+            System.gc ();
+        });
+
     }
 
     @FXML
@@ -295,8 +292,6 @@ public final class DownloadPreparationController extends Controller implements I
 
     public void onClickTxtConnectionMessage ()
     {
-        if (url.contains ("http://") && chkToHttps.isSelected ()) setTxtURL (url);
-
         txtConnectionMessage.setText ("Connecting...");
         progress.setVisible (true);
         txtConnectionMessage.setDisable (true);
@@ -363,7 +358,13 @@ public final class DownloadPreparationController extends Controller implements I
             {
 
             }
-        } , chkToHttps.isSelected ());
+
+            @Override
+            public void OnNewLink (final String NewLink)
+            {
+                setTxtURL (NewLink);
+            }
+        });
     }
 
     private void downloadListModify (final boolean completed)
@@ -545,7 +546,7 @@ public final class DownloadPreparationController extends Controller implements I
     private void setTxtURL (final String url)
     {
         this.url = url;
-        Platform.runLater (() -> txtURL.setText (URLDecoder.decode (((chkToHttps.isSelected () ? url.replace ("http://" , "https://") : url)) , StandardCharsets.UTF_8)));
+        Platform.runLater (() -> txtURL.setText (URLDecoder.decode (url , StandardCharsets.UTF_8)));
     }
 
     private void showAlert (final String title , final String headerText , final String content)
@@ -584,15 +585,61 @@ public final class DownloadPreparationController extends Controller implements I
         return downloadList == null || downloadList.getPath () == null || downloadList.getPath ().isEmpty ();
     }
 
+    public void onClickTxtSaveAs (final MouseEvent mouseEvent)
+    {
+        if (mouseEvent.getClickCount () == 2)
+        {
+            final String saveAs = txtSaveAs.getText ();
+            if (notEmpty (saveAs))
+            {
+                try
+                {
+                    openPath (new File (saveAs).getParentFile ());
+                }
+                catch (final Exception e)
+                {
+                    Log.N (e);
+                }
+            }
+        }
+    }
+
+    public void onClickTxtPath (final MouseEvent mouseEvent)
+    {
+        if (mouseEvent.getClickCount () == 2)
+        {
+            final String path = txtPath.getText ();
+            if (notEmpty (path))
+            {
+                try
+                {
+                    openPath (new File (path));
+                }
+                catch (final Exception e)
+                {
+                    Log.N (e);
+                }
+            }
+        }
+    }
+
+    private void openPath (final File file)
+    {
+        if (file.exists ())
+        {
+            try
+            {
+                Desktop.getDesktop ().open (file);
+            }
+            catch (final IOException e)
+            {
+                Log.N (e);
+            }
+        }
+    }
+
     public interface ForInfo
     {
         void GetDownloadList (final int Index , final ListUrlController.LinkInformation _LinkInformation);
-    }
-
-    @FXML
-    public void onClickChkToHttps ()
-    {
-        setTxtURL (txtURL.getText ());
-        onClickTxtConnectionMessage ();
     }
 }

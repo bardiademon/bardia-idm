@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -114,6 +115,11 @@ public final class AddUrlController implements Initializable
                                 public void OnCancelDownload ()
                                 {
                                     Log.N ("OnCancelDownload " + getClass ().getName ());
+                                }
+
+                                @Override
+                                public void OnNewLink (final String Link)
+                                {
                                 }
                             });
                             new Download ();

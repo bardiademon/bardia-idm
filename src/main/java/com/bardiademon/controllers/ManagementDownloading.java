@@ -6,6 +6,7 @@ import com.bardiademon.bardiademon.NT;
 import com.bardiademon.models.DownloadList.DownloadList;
 import com.bardiademon.models.DownloadList.DownloadListService;
 import javafx.application.Platform;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +32,7 @@ public final class ManagementDownloading
         this.result = _Result;
         this.downloadingController = new ArrayList <> ();
         this.downloadListService = new DownloadListService ();
-        start (getMultipleDownloads ());
+        start ();
     }
 
     public void stop ()
@@ -48,23 +49,17 @@ public final class ManagementDownloading
         }).start ();
     }
 
-    private List <DownloadList> getMultipleDownloads ()
+    private void start ()
     {
-        final List <DownloadList> downloadList = new ArrayList <> ();
         try
         {
-            for (; index < NUMBER_OF_SIMULTANEOUS_DOWNLOADS; index++) downloadList.add (downloadLists.get (index));
+            for (int i = 0; i < NUMBER_OF_SIMULTANEOUS_DOWNLOADS; i++)
+                launch (downloadLists.get (index++));
         }
         catch (final Exception e)
         {
             Log.N (e);
         }
-        return downloadList;
-    }
-
-    private void start (List <DownloadList> downloadLists)
-    {
-        for (final DownloadList multipleDownload : downloadLists) launch (multipleDownload);
     }
 
     private void launch (final DownloadList downloadList)
@@ -83,8 +78,7 @@ public final class ManagementDownloading
                 downloadList.setCompleted (done);
                 downloadListService.modify (downloadList);
                 NT.N (Main.getMainController ()::refresh);
-                launch (downloadLists.get (++index));
-                System.gc ();
+                launch (downloadLists.get (index++));
             }
             catch (final Exception e)
             {

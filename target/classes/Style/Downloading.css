@@ -1,6 +1,5 @@
 #body {
-    -fx-background-image: url("../Images/bg_downloading.jpg");
-    -fx-background-size: 100%;
+    -fx-background-color: #f8f8f8;
 }
 
 .progress-indicator .percentage {

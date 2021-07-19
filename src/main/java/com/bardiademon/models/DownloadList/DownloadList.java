@@ -1,6 +1,7 @@
 package com.bardiademon.models.DownloadList;
 
 import com.bardiademon.bardiademon.GetSize;
+
 import java.time.LocalDateTime;
 
 public class DownloadList
@@ -14,7 +15,9 @@ public class DownloadList
     private boolean completed, createdDir;
     private long size;
 
-    private boolean toHttps, theNameHasNoSuffix;
+    private String filename;
+
+    private boolean  theNameHasNoSuffix;
 
     private long listId;
 
@@ -127,16 +130,6 @@ public class DownloadList
         return description;
     }
 
-    public boolean isToHttps ()
-    {
-        return toHttps;
-    }
-
-    public void setToHttps (boolean toHttps)
-    {
-        this.toHttps = toHttps;
-    }
-
     public boolean isTheNameHasNoSuffix ()
     {
         return theNameHasNoSuffix;
@@ -155,6 +148,16 @@ public class DownloadList
     public void setListId (long listId)
     {
         this.listId = listId;
+    }
+
+    public String getFilename ()
+    {
+        return filename;
+    }
+
+    public void setFilename (String filename)
+    {
+        this.filename = filename;
     }
 
     @Override

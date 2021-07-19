@@ -30,9 +30,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -359,7 +362,7 @@ public final class ListUrlController implements Initializable
 
     private void addToList (final List <String> links)
     {
-        addToList (true , links.toArray (new String[] { }));
+        addToList (true , links.toArray (new String[]{}));
     }
 
     private void addToList (final boolean save , final String... links)
@@ -555,7 +558,8 @@ public final class ListUrlController implements Initializable
             {
                 try
                 {
-                    ListUrlController.this.linkInformation.get (index).setFilename (Filename);
+                    final String filename = URLDecoder.decode (Filename , StandardCharsets.UTF_8);
+                    ListUrlController.this.linkInformation.get (index).setFilename (filename);
                     Platform.runLater (() -> list.getItems ().set (index , linkInformation.get (index)));
                 }
                 catch (final Exception e)
@@ -599,6 +603,12 @@ public final class ListUrlController implements Initializable
 
             @Override
             public void OnCancelDownload ()
+            {
+
+            }
+
+            @Override
+            public void OnNewLink (final String Link)
             {
 
             }
@@ -805,7 +815,6 @@ public final class ListUrlController implements Initializable
             setTheNameHasNoSuffix (downloadList.isTheNameHasNoSuffix ());
             setSize (downloadList.getByteSize ());
             setStatus ("Please wait...");
-            setToHttps (downloadList.isToHttps ());
             setCompleted (downloadList.isCompleted ());
             setDescription (downloadList.getDescription ());
             setListId (downloadList.getListId ());

@@ -18,10 +18,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DownloadingController implements On
@@ -40,13 +38,10 @@ public class DownloadingController implements On
     public Text txtDownloadedOfFilesize_byte;
 
     private String url, filename, path;
-    private boolean createDir, theNameHasNoSuffix, toHttps;
+    private boolean createDir, theNameHasNoSuffix;
     private Stage stage;
     private DownloadResult downloadResult;
     private Download download;
-
-    @FXML
-    public Text txtDownloaded;
 
     @FXML
     public Text txtSpeed;
@@ -109,35 +104,35 @@ public class DownloadingController implements On
 
     public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult)
     {
-        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , null);
+        Launch (_DownloadList.getLink () , _DownloadList.getFilename () , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadResult , null);
     }
 
     public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult , final Controller _Controller)
     {
-        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , false , _Controller);
+        Launch (_DownloadList.getLink () , _DownloadList.getFilename () , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadResult , false , _Controller);
     }
 
     public static void Launch (final DownloadList _DownloadList , final DownloadResult _DownloadResult , final boolean Fast , final Controller _Controller)
     {
-        Launch (_DownloadList.getLink () , FilenameUtils.getName (_DownloadList.getPath ()) , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadList.isToHttps () , _DownloadResult , Fast , _Controller);
+        Launch (_DownloadList.getLink () , _DownloadList.getFilename () , _DownloadList.getPath () , _DownloadList.isCreatedDir () , _DownloadList.isTheNameHasNoSuffix () , _DownloadResult , Fast , _Controller);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult)
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final DownloadResult _DownloadResult)
     {
-        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false , null);
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , _DownloadResult , false , null);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast)
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final DownloadResult _DownloadResult , final boolean Fast)
     {
-        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , Fast , null);
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , _DownloadResult , Fast , null);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , Controller _Controller)
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final DownloadResult _DownloadResult , Controller _Controller)
     {
-        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , ToHttps , _DownloadResult , false , _Controller);
+        Launch (URL , Filename , Path , CreateDir , TheNameHasNoSuffix , _DownloadResult , false , _Controller);
     }
 
-    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final boolean ToHttps , final DownloadResult _DownloadResult , final boolean Fast , Controller _Controller)
+    public static void Launch (final String URL , final String Filename , final String Path , final boolean CreateDir , final boolean TheNameHasNoSuffix , final DownloadResult _DownloadResult , final boolean Fast , Controller _Controller)
     {
         Platform.runLater (() -> Main.Launch ("Downloading" , Filename , (Main.Controller <DownloadingController>) (controller , stage) ->
         {
@@ -148,10 +143,9 @@ public class DownloadingController implements On
             controller.theNameHasNoSuffix = TheNameHasNoSuffix;
             controller.stage = stage;
             controller.downloadResult = _DownloadResult;
-            controller.toHttps = ToHttps;
             controller.fast = Fast;
 
-            controller.txtFilename.setText (Filename);
+            Platform.runLater (() -> controller.txtFilename.setText (Filename));
 
             controller.run ();
 
@@ -163,13 +157,16 @@ public class DownloadingController implements On
 
     public void run ()
     {
-        download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , toHttps , this);
+        download = new Download (url , path , createDir , theNameHasNoSuffix , false , true , this);
     }
 
     public void setTxtDownloadedOfFilesize (final long size)
     {
-        txtDownloadedOfFilesize.setText (String.format ("%s of %s Downloaded" , GetSize.Get (size) , GetSize.Get (filesize)));
-        txtDownloadedOfFilesize_byte.setText (String.format ("%d byte of %d byte Downloaded" , size , filesize));
+        Platform.runLater (() ->
+        {
+            txtDownloadedOfFilesize.setText (String.format ("%s of %s Downloaded" , GetSize.Get (size) , GetSize.Get (filesize)));
+            txtDownloadedOfFilesize_byte.setText (String.format ("%d byte of %d byte Downloaded" , size , filesize));
+        });
     }
 
     @Override
@@ -253,6 +250,8 @@ public class DownloadingController implements On
     @Override
     public void OnExistsFileErrorDeleteFile (final Exception E , final File _File)
     {
+        Log.N (_File.getAbsolutePath () , E);
+        close (false);
     }
 
     @Override
@@ -333,10 +332,29 @@ public class DownloadingController implements On
     @Override
     public void OnCancelDownload ()
     {
+        stop ();
+    }
+
+    @Override
+    public void OnNewLink (final String Link)
+    {
+        url = Link;
     }
 
     @Override
     public void OnCompulsoryStop ()
+    {
+        stop ();
+    }
+
+    @Override
+    public void OnCompulsoryStopCloseStreamError (final Exception e)
+    {
+        alert ("Close download error" , "Error compulsory stop > " + e.getMessage ());
+        stop ();
+    }
+
+    private void stop ()
     {
         runDownloadResult ();
         Platform.runLater (() ->
@@ -348,15 +366,10 @@ public class DownloadingController implements On
     }
 
     @Override
-    public void OnCompulsoryStopCloseStreamError (final Exception e)
-    {
-        alert ("Close download error" , "Error compulsory stop > " + e.getMessage ());
-    }
-
-    @Override
     public void OnError (final Exception E)
     {
-
+        Log.N (E);
+        close (false);
     }
 
     @Override
@@ -378,7 +391,7 @@ public class DownloadingController implements On
         final float progress = (float) percent / 100;
         this.progress.setProgress (progress);
         this.circleProgress.setProgress (progress);
-        txtCenterProgressDownloaded.setText (String.format ("Downloaded: %d%%" , percent));
+        Platform.runLater (() -> txtCenterProgressDownloaded.setText (String.format ("Downloaded: %d%%" , percent)));
     }
 
     public interface DownloadResult
