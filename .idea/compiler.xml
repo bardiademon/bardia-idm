@@ -19,8 +19,5 @@
         <module name="IDMBardia" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="IDMBardia" target="16" />
-    </bytecodeTargetLevel>
   </component>
 </project>
